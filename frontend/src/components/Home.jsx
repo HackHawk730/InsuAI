@@ -15,7 +15,6 @@ import {
     FiAperture,
     FiActivity
 } from 'react-icons/fi';
-import landingBg from '../assets/landing_bg.png'; // Fallback
 // Using the generated premium hero image
 import heroImage from '../assets/insure_ai_hero.png';
 
