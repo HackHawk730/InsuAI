@@ -7,6 +7,7 @@ import AdminUsers from './admin-dashboard/AdminUsers';
 import AdminAppointments from './admin-dashboard/AdminAppointments';
 import SystemAgents from './user-dashboard/SystemAgents';
 import SystemIntelligence from './admin-dashboard/SystemIntelligence';
+import AdminNotificationManagement from '../components/AdminNotificationManagement'; // Add this import for notification table
 
 import { getSession } from '../services/session';
 
@@ -71,8 +72,8 @@ const AdminDashboard = ({ onLogout }) => {
             onLogout={onLogout}
         >
             <Routes>
-                <Route index element={<AdminHome userName={userName} onNavigate={handleNavigate} stats={stats} />} />
-                <Route path="home" element={<AdminHome userName={userName} onNavigate={handleNavigate} stats={stats} />} />
+                <Route index element={<AdminHome userName={userName} onNavigate={handleNavigate} stats={stats} notifications={<AdminNotificationManagement />} />} />
+                <Route path="home" element={<AdminHome userName={userName} onNavigate={handleNavigate} stats={stats} notifications={<AdminNotificationManagement />} />} />
                 <Route path="policies" element={<AdminPolicies />} />
                 <Route path="appointments" element={<AdminAppointments />} />
                 <Route path="users" element={<AdminUsers />} />

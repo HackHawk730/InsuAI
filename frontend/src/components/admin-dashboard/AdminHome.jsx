@@ -11,7 +11,20 @@ import {
 } from 'react-icons/hi';
 import './AdminHome.css';
 
-const AdminHome = ({ userName, onNavigate, stats }) => {
+const AdminHome = ({ userName, onNavigate, stats , notifications }) => {
+    
+  // Add notifications prop
+  return (
+    <div>
+      {/* Existing content (e.g., welcome message, stats, etc.) */}
+      <h2>Dashboard Overview</h2>
+      {/* Add notification management section */}
+      {notifications}  {/* Render the AdminNotificationManagement component */}
+      {/* Rest of existing content */}
+    </div>
+  );
+
+
     const displayStats = [
         {
             label: 'Pending Approvals',

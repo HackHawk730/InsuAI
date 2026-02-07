@@ -5,6 +5,7 @@ import AgentHome from './agent-dashboard/AgentHome';
 import AgentRequests from './agent-dashboard/AgentRequests';
 import AgentAvailability from './agent-dashboard/AgentAvailability';
 import AgentPolicies from './agent-dashboard/AgentPolicies';
+import AgentNotification from '../components/AgentNotification'; // Add this import for Bell Icon
 
 import { getSession } from '../services/session';
 
@@ -31,6 +32,7 @@ const AgentDashboard = ({ onLogout }) => {
             userEmail={userEmail}
             userName={userName}
             onLogout={onLogout}
+            notifications={<AgentNotification />} // Pass Bell Icon to layout (modify AgentDashboardLayout to render this in header)
         >
             <Routes>
                 <Route index element={<AgentHome userName={userName} specialization={specialization} company={company} onNavigate={handleNavigate} />} />
