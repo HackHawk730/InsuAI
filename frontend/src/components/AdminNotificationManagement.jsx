@@ -7,8 +7,11 @@ const AdminNotificationManagement = () => {
   useEffect(() => {
     // Fetch notifications on load and poll every 30s
     const fetchNotifications = () => {
-      axios.get('/api/admin/notifications')
-        .then(response => setNotifications(response.data))
+      axios.get('/InsureAi/admin/notifications')
+        .then(response => {
+          const data = response.data;
+          setNotifications(Array.isArray(data) ? data : []);
+        })
         .catch(err => console.log('Error fetching notifications:', err));
     };
     fetchNotifications();
@@ -29,7 +32,7 @@ const AdminNotificationManagement = () => {
           </tr>
         </thead>
         <tbody>
-          {notifications.length > 0 ? (
+          {Array.isArray(notifications) && notifications.length > 0 ? (
             notifications.map(note => (
               <tr key={note.id} style={{ borderBottom: '1px solid #ddd' }}>
                 <td style={{ padding: '10px' }}>{note.type} (e.g., User/Agent)</td>

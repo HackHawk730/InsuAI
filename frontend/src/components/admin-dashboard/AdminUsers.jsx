@@ -80,9 +80,9 @@ const AdminUsers = () => {
                                             <td style={{ padding: '1.25rem 1.5rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                                     <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                                                        {user.name.charAt(0).toUpperCase()}
+                                                        {(user.name || 'U').charAt(0).toUpperCase()}
                                                     </div>
-                                                    <span style={{ fontWeight: '500' }}>{user.name}</span>
+                                                    <span style={{ fontWeight: '500' }}>{user.name || 'N/A'}</span>
                                                 </div>
                                             </td>
                                             <td style={{ padding: '1.25rem 1.5rem', color: '#94a3b8' }}>{user.email}</td>

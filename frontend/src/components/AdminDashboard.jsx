@@ -7,7 +7,7 @@ import AdminUsers from './admin-dashboard/AdminUsers';
 import AdminAppointments from './admin-dashboard/AdminAppointments';
 import SystemAgents from './user-dashboard/SystemAgents';
 import SystemIntelligence from './admin-dashboard/SystemIntelligence';
-import AdminNotificationManagement from '../components/AdminNotificationManagement'; // Add this import for notification table
+import AdminNotificationManagement from './AdminNotificationManagement'; // Add this import for notification table
 
 import { getSession } from '../services/session';
 

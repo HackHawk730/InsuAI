@@ -216,18 +216,17 @@
     background: transparent;
     position: relative;
     z-index: 1;
+    scroll-behavior: auto;
     animation: adViewEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes adViewEnter {
     from {
         opacity: 0;
-        transform: translateY(12px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 

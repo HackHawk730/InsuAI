@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';  // Added useState and useEffect
 import { HiClipboardList, HiCalendar, HiDocumentText } from 'react-icons/hi';
 import axios from 'axios';  // Added for API calls
-import StarRating from 'react-star-ratings';  // Added for star ratings
+import StarRatings from 'react-star-ratings';  // Added for star ratings
 import './AgentDashboardLayout.css';
 
 const AgentHome = ({ userName, specialization, company, onNavigate }) => {
@@ -81,7 +81,7 @@ const AgentHome = ({ userName, specialization, company, onNavigate }) => {
                 {feedback.length > 0 ? (
                     feedback.map(f => (
                         <div key={f.id} style={{ margin: '10px 0', border: '1px solid #ddd', padding: '10px', background: '#f9f9f9' }}>
-                            <StarRating
+                            <StarRatings
                                 rating={f.rating}
                                 starRatedColor="gold"
                                 numberOfStars={5}

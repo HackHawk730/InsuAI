@@ -11,20 +11,7 @@ import {
 } from 'react-icons/hi';
 import './AdminHome.css';
 
-const AdminHome = ({ userName, onNavigate, stats , notifications }) => {
-    
-  // Add notifications prop
-  return (
-    <div>
-      {/* Existing content (e.g., welcome message, stats, etc.) */}
-      <h2>Dashboard Overview</h2>
-      {/* Add notification management section */}
-      {notifications}  {/* Render the AdminNotificationManagement component */}
-      {/* Rest of existing content */}
-    </div>
-  );
-
-
+const AdminHome = ({ userName, onNavigate, stats, notifications }) => {
     const displayStats = [
         {
             label: 'Pending Approvals',
@@ -141,6 +128,16 @@ const AdminHome = ({ userName, onNavigate, stats , notifications }) => {
                             </div>
                         </div>
                     ))}
+                </div>
+            </div>
+
+            {/* Notifications Management Section */}
+            <div className="admin-notifications-section" style={{ marginTop: '40px' }}>
+                <div className="admin-section-header">
+                    <h2>Recent System Notifications</h2>
+                </div>
+                <div className="notifications-container-flat" style={{ background: '#0f172a', borderRadius: '12px', padding: '20px', border: '1px solid #1e293b' }}>
+                    {notifications}
                 </div>
             </div>
 
