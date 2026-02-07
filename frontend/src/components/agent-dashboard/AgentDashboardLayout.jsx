@@ -19,7 +19,7 @@ const NAV_ITEMS = [
     { id: 'policies', label: 'Policy Reviews', icon: HiDocumentText, path: '/agent-dashboard/policies' },
 ];
 
-const AgentDashboardLayout = ({ children, userEmail, userName, onLogout }) => {
+const AgentDashboardLayout = ({ children, userEmail, userName, onLogout, notifications }) => {  // Added notifications prop
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const location = useLocation();
 
@@ -70,6 +70,7 @@ const AgentDashboardLayout = ({ children, userEmail, userName, onLogout }) => {
                     </button>
                     <div className="ad-topbar-brand">Agent Workspace</div>
                     <div className="ad-topbar-actions">
+                        {notifications}  {/* Added: Renders the Bell Icon */}
                         <span className="ad-user-name">{userName || userEmail || 'Agent'}</span>
                         <button type="button" className="ad-logout-btn" onClick={onLogout}>
                             Logout

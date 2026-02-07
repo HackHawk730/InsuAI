@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays; // Added for sample data
+import java.util.Map;    // Added for sample data
 
 @RestController
 @RequestMapping("/InsureAi")
@@ -153,5 +155,38 @@ public class UserController {
         stats.put("agents", AuthService.getByRole("Agent").size());
         stats.put("policies", policyService.getAllPolicies().size());
         return ResponseEntity.ok(stats);
+    }
+
+    // New: Agent Notifications Endpoint
+    @GetMapping("/agent/notifications")
+    public ResponseEntity<List<Map<String, Object>>> getAgentNotifications() {
+        // Sample data (replace with real DB query, e.g., from a NotificationRepo)
+        List<Map<String, Object>> notifications = Arrays.asList(
+            Map.of("id", 1, "message", "New feedback received", "type", "Feedback"),
+            Map.of("id", 2, "message", "Policy update available", "type", "Update")
+        );
+        return ResponseEntity.ok(notifications);
+    }
+
+    // New: Admin Notifications Endpoint
+    @GetMapping("/admin/notifications")
+    public ResponseEntity<List<Map<String, Object>>> getAdminNotifications() {
+        // Sample data (replace with real DB query)
+        List<Map<String, Object>> notifications = Arrays.asList(
+            Map.of("id", 1, "type", "User", "message", "New user registered", "status", "Pending", "timestamp", "2023-10-01"),
+            Map.of("id", 2, "type", "Agent", "message", "Agent request approved", "status", "Approved", "timestamp", "2023-10-02")
+        );
+        return ResponseEntity.ok(notifications);
+    }
+
+    // New: Agent Feedback Endpoint
+    @GetMapping("/agent/feedback")
+    public ResponseEntity<List<Map<String, Object>>> getAgentFeedback() {
+        // Sample data (replace with real DB query)
+        List<Map<String, Object>> feedback = Arrays.asList(
+            Map.of("id", 1, "rating", 4.5, "comment", "Great service!"),
+            Map.of("id", 2, "rating", 5.0, "comment", "Excellent support.")
+        );
+        return ResponseEntity.ok(feedback);
     }
 }
