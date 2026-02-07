@@ -16,7 +16,8 @@ import java.util.Arrays;
 @Configuration
 public class Securityconfig {
 
-    //Spring Security Config For the Security of Endpoints of Website ---------------------------
+    // Spring Security Config For the Security of Endpoints of Website
+    // ---------------------------
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -43,15 +44,18 @@ public class Securityconfig {
                                 "/InsureAi/forgot-password/**",
                                 "/InsureAi/reset-password/**",
                                 "/actuator/**",
-                                "/InsureAi/allSchedules/**")
+                                "/InsureAi/allSchedules/**",
+                                "/InsureAi/agent/notifications/**",
+                                "/InsureAi/admin/notifications/**",
+                                "/InsureAi/agent/feedback/**")
                         .permitAll()// allow these
-                        .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults()); // optional for testing
+                        .anyRequest().authenticated());
 
         return http.build();
     }
 
-    //Config For stop a Blocking  Frontend Endpoint by Spring security Called CORSConfig-----------------------
+    // Config For stop a Blocking Frontend Endpoint by Spring security Called
+    // CORSConfig
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -67,7 +71,7 @@ public class Securityconfig {
         return source;
     }
 
-    //Initialize Bean For Inject BcryptEncoding Technique in Service layer  ---------------------------------
+    // Initialize Bean For Inject BcryptEncoding Technique in Service layer
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
