@@ -47,8 +47,10 @@ public class Securityconfig {
                                 "/InsureAi/allSchedules/**",
                                 "/InsureAi/agent/notifications/**",
                                 "/InsureAi/admin/notifications/**",
-                                "/InsureAi/agent/feedback/**")
+                                "/InsureAi/agent/feedback/**",
+                                "/api/notifications/**")
                         .permitAll()// allow these
+                        
                         .anyRequest().authenticated());
 
         return http.build();
