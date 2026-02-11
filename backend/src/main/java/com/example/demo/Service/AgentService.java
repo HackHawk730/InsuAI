@@ -8,6 +8,10 @@ import com.example.demo.Repo.UserDTOREPO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.Object.Notification;
+import com.example.demo.Repo.NotificationRepo;
+import com.example.demo.Service.EmailService;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,6 +24,12 @@ public class AgentService {
 
     @Autowired
     private ScheduleRepo scheduleRepo;
+
+    @Autowired
+    private NotificationRepo notificationRepo;
+
+    @Autowired
+    private EmailService emailService;
 
     // Agent Scheduling Service ----------------
     public String agentScheduling(Schedule schedule, String email) {
@@ -88,6 +98,16 @@ public class AgentService {
 
         scheduleRepo.save(s);
 
+        // --- ADDED: NOTIFICATION LOGIC ---
+        // 1. Notify Agent
+        notificationRepo.save(new Notification(agentEmail, "New Appointment Request", "User " + userEmail + " booked a slot on " + s.getDate(), "INFO"));
+        emailService.sendEmail(agentEmail, "New Appointment Booking", "You have a new appointment with " + userEmail + ".\nNote: " + userNote);
+
+        // 2. Notify User
+        notificationRepo.save(new Notification(userEmail, "Booking Confirmed", "Your appointment with " + agentEmail + " is confirmed.", "SUCCESS"));
+        emailService.sendEmail(userEmail, "Appointment Confirmation", "Your appointment is confirmed for " + s.getDate() + " at " + startTime);
+        // ---------------------------------
+
         return "Slot booked successfully";
     }
 
@@ -113,6 +133,15 @@ public class AgentService {
         if (!agentEmail.equalsIgnoreCase(s.getAgentEmail())) {
             return "Unauthorized access to schedule";
         }
+
+        // --- ADDED: NOTIFICATION LOGIC ---
+        // Notify User about the change
+        if(s.getBookedByUserEmail() != null) {
+            String type = "CONFIRMED".equalsIgnoreCase(newStatus) ? "SUCCESS" : "WARNING";
+            notificationRepo.save(new Notification(s.getBookedByUserEmail(), "Appointment Update", "Agent has marked your appointment as " + newStatus, type));
+            emailService.sendEmail(s.getBookedByUserEmail(), "Appointment Update", "Status changed to: " + newStatus);
+        }
+        // ---------------------------------
 
         s.setStatus(newStatus);
         scheduleRepo.save(s);

@@ -5,6 +5,10 @@ import com.example.demo.Repo.PolicyRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.demo.Object.PolicyApplyForm;
+import com.example.demo.Object.Notification;
+import com.example.demo.Repo.NotificationRepo;
+import com.example.demo.Service.EmailService;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +21,12 @@ public class PolicyService {
 
     @Autowired
     private com.example.demo.Repo.PolicyApplyFormRepo policyApplyFormRepo;
+
+    @Autowired
+    private NotificationRepo notificationRepo;
+
+    @Autowired
+    private EmailService emailService;
 
     public Policy applyForPolicy(String userEmail, String typeId, String policyTypeName,
             java.util.Map<String, Object> formData) {
@@ -31,6 +41,14 @@ public class PolicyService {
         policy.setAppliedAt(LocalDateTime.now());
         policy.setUpdatedAt(LocalDateTime.now());
         Policy savedPolicy = policyRepo.save(policy);
+
+        notificationRepo.save(new Notification(userEmail, "Application Submitted", "Your application for " + policyTypeName + " has been received.", "INFO"));
+        emailService.sendEmail(userEmail, "Application Received - InsurAI", "We have received your application for " + policyTypeName + ". Reference ID: " + savedPolicy.getId());
+
+        // 2. Notify Admin (assuming admin email is fixed or you loop through admins)
+        String adminEmail = "admin123@gmail.com"; // Replace with real admin email fetching logic if needed
+        notificationRepo.save(new Notification(adminEmail, "New Policy Application", "User " + userEmail + " applied for " + policyTypeName, "WARNING"));
+        // ---------------------------------
 
         // Form data saving for apply in policy
         PolicyApplyForm form = new PolicyApplyForm();
@@ -60,13 +78,25 @@ public class PolicyService {
     }
 
     // Update the policy status as per approval
-    public Policy updatePolicyStatus(String policyId, String status, String comments) {
+public Policy updatePolicyStatus(String policyId, String status, String comments) {
         Policy policy = policyRepo.findById(policyId).orElse(null);
         if (policy != null) {
             policy.setStatus(status);
             policy.setAgentComments(comments);
             policy.setUpdatedAt(LocalDateTime.now());
-            return policyRepo.save(policy);
+            
+            Policy updatedPolicy = policyRepo.save(policy);
+
+            // --- ADDED: NOTIFICATION LOGIC ---
+            String notifType = status.contains("APPROVED") ? "SUCCESS" : "ERROR";
+            String userMsg = "Your policy status has been updated to: " + status;
+            
+            // Notify User
+            notificationRepo.save(new Notification(policy.getUserEmail(), "Policy Update: " + status, userMsg, notifType));
+            emailService.sendEmail(policy.getUserEmail(), "Policy Status Update", userMsg + "\nComments: " + comments);
+            // ---------------------------------
+
+            return updatedPolicy;
         }
         return null;
     }

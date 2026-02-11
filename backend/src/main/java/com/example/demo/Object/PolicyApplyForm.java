@@ -16,4 +16,10 @@ public class PolicyApplyForm {
     private String policyTypeName;
     private Map<String, Object> formData;
     private LocalDateTime submittedAt;
+
+    public void setUserEmail(String email) { this.userEmail = email; }
+    public void setTypeId(String id) { this.typeId = id; }
+    public void setPolicyTypeName(String name) { this.policyTypeName = name; }
+    public void setFormData(java.util.Map<String, Object> data) { this.formData = data; }
+    public void setSubmittedAt(java.time.LocalDateTime date) { this.submittedAt = date; }
 }

@@ -51,6 +51,190 @@
   justify-content: space-between;
 }
 
+/* ... existing styles ... */
+
+.ud-notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.ud-notification-header h3 {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* The Mark All Read Button */
+.ud-mark-all-read {
+  background: rgba(37, 99, 235, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ud-mark-all-read:hover {
+  background: rgba(37, 99, 235, 0.3);
+}
+
+.ud-notification-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #334155;
+  background: #0f172a;
+  cursor: pointer;
+}
+
+.ud-notification-item:hover {
+  background: #1e293b;
+}
+
+.ud-notification-item.unread {
+  background: #172554;
+  /* Dark blue tint for unread */
+}
+
+.ud-notification-content {
+  flex: 1;
+}
+
+.ud-notification-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.ud-unread-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ud-notification-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 8px;
+  display: flex;
+  align-items: flex-start;
+  height: fit-content;
+}
+
+.ud-notification-close:hover {
+  color: #ef4444;
+  /* Red on hover */
+}
+
+/* ... keep your existing layout styles ... */
+
+.ud-notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.ud-notification-header h3 {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.ud-mark-all-read {
+  background: rgba(37, 99, 235, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ud-mark-all-read:hover {
+  background: rgba(37, 99, 235, 0.3);
+}
+
+.ud-notification-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #334155;
+  background: #0f172a;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ud-notification-item:hover {
+  background: #1e293b;
+}
+
+.ud-notification-item.unread {
+  background: #172554;
+}
+
+.ud-notification-content {
+  flex: 1;
+}
+
+.ud-notification-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.ud-unread-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ud-notification-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 8px;
+  display: flex;
+  align-items: flex-start;
+  height: fit-content;
+  border-radius: 4px;
+}
+
+.ud-notification-close:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
 .ud-sidebar-brand {
   display: flex;
   align-items: center;
@@ -292,13 +476,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: #fff;
+
+  /* Solid Bright Red */
+  background: #ef4444;
+  color: #ffffff;
+
   font-size: 0.65rem;
   font-weight: 700;
   border-radius: 9px;
-  border: 2px solid #0f172a;
-  animation: pulse 2s infinite;
+
+  /* Matches the button color to create a "cutout" effect */
+  border: 2px solid #1f2937;
+
+  /* ADD THIS: The Glow Effect */
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+
+  /* Removed opacity change from animation */
+  animation: none;
+}
+
+/* If you still want the size pulse without fading, use this: */
+.ud-notification-badge.animating {
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes pulse {

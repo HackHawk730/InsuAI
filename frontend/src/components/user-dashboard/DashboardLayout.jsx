@@ -1,17 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 import {
-  HiHome,
-  HiCalendar,
-  HiDocumentText,
-  HiClipboardList,
-  HiLibrary,
-  HiSupport,
-  HiCog,
-  HiMenu,
-  HiX,
-  HiUsers,
-  HiShieldCheck,
-  HiBell,
+  HiHome, HiCalendar, HiDocumentText, HiClipboardList,
+  HiLibrary, HiSupport, HiCog, HiMenu, HiX, HiBell, HiShieldCheck,
 } from 'react-icons/hi';
 import { NavLink, useLocation } from 'react-router-dom';
 import './DashboardLayout.css';
@@ -26,107 +17,96 @@ const NAV_ITEMS = [
   { id: 'settings', label: 'Settings', icon: HiCog, path: '/dashboard/settings' },
 ];
 
+const formatRelativeTime = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMinutes = Math.floor((now - date) / 60000);
+  if (diffInMinutes < 1) return 'Just now';
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+  return `${Math.floor(diffInHours / 24)}d ago`;
+};
+
 const DashboardLayout = ({ children, userEmail, userName, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const location = useLocation();
+  const [notifications, setNotifications] = useState([]);
   const notificationRef = useRef(null);
+  const location = useLocation();
 
-  // Mock notifications - in real app, this would come from API
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'appointment',
-      title: 'Appointment Confirmed',
-      message: 'Your appointment with Agent John Doe has been confirmed for Jan 28, 2026',
-      time: '2 hours ago',
-      read: false,
-    },
-    {
-      id: 2,
-      type: 'policy',
-      title: 'Policy Application Update',
-      message: 'Your Health Insurance policy application is under review',
-      time: '5 hours ago',
-      read: false,
-    },
-    {
-      id: 3,
-      type: 'reminder',
-      title: 'Upcoming Appointment',
-      message: 'You have an appointment tomorrow at 10:00 AM',
-      time: '1 day ago',
-      read: true,
-    },
-  ]);
-
-  // Close notification dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setNotificationOpen(false);
-      }
-    };
-
-    if (notificationOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+  // 1. Fetch Notifications
+  const fetchNotifications = async () => {
+    if (!userEmail) return;
+    try {
+      const response = await axios.get(`http://localhost:9090/api/notifications/${userEmail}`);
+      setNotifications(response.data);
+    } catch (error) {
+      console.error("Error fetching notifications");
     }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [notificationOpen]);
-
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const handleNotificationClick = () => {
-    setNotificationOpen(!notificationOpen);
   };
 
-  const markAsRead = (id) => {
-    setNotifications(notifications.map(n =>
-      n.id === id ? { ...n, read: true } : n
-    ));
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 5000);
+    return () => clearInterval(interval);
+  }, [userEmail]);
+
+  // 2. Mark Single as Read
+  const markAsRead = async (id, currentStatus) => {
+    if (currentStatus) return;
+    // Optimistic UI Update
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    try {
+      await axios.put(`http://localhost:9090/api/notifications/read/${id}`);
+    } catch (error) {
+      console.error("Failed to mark read");
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  // 3. Mark All as Read
+  const markAllAsRead = async () => {
+    const unreadIds = notifications.filter(n => !n.isRead).map(n => n.id);
+    if (unreadIds.length === 0) return;
+
+    // Optimistic UI Update
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    
+    try {
+      await Promise.all(unreadIds.map(id => axios.put(`http://localhost:9090/api/notifications/read/${id}`)));
+    } catch (error) {
+      console.error("Failed to mark all read");
+    }
   };
 
-  const clearNotification = (id) => {
-    setNotifications(notifications.filter(n => n.id !== id));
+  // 4. Delete Notification (The 'X' Button)
+  const deleteNotification = async (id, e) => {
+    e.stopPropagation(); // Stop click from triggering "markAsRead"
+    
+    // Optimistic UI Update (Remove instantly)
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    
+    try {
+      await axios.delete(`http://localhost:9090/api/notifications/${id}`);
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+    }
   };
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
     <div className="ud-layout">
       <aside className={`ud-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="ud-sidebar-header">
-          <div className="ud-sidebar-brand">
-            <HiShieldCheck className="brand-icon" />
-            <span>InsurAI</span>
-          </div>
-          <button
-            type="button"
-            className="ud-sidebar-close"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Close menu"
-          >
-            <HiX />
-          </button>
+          <div className="ud-sidebar-brand"><HiShieldCheck className="brand-icon" /><span>InsurAI</span></div>
+          <button className="ud-sidebar-close" onClick={() => setSidebarOpen(false)}><HiX /></button>
         </div>
         <nav className="ud-sidebar-nav">
           {NAV_ITEMS.map(({ id, label, icon: Icon, path }) => (
-            <NavLink
-              key={id}
-              to={path}
-              end={id === 'home'}
-              className={({ isActive }) => `ud-nav-item ${isActive ? 'active' : ''}`}
-              onClick={() => {
-                setSidebarOpen(false);
-              }}
-            >
-              <Icon className="ud-nav-icon" />
-              <span>{label}</span>
+            <NavLink key={id} to={path} end={id === 'home'} className={({ isActive }) => `ud-nav-item ${isActive ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
+              <Icon className="ud-nav-icon" /><span>{label}</span>
             </NavLink>
           ))}
         </nav>
@@ -134,83 +114,47 @@ const DashboardLayout = ({ children, userEmail, userName, onLogout }) => {
 
       <div className="ud-main">
         <header className="ud-topbar">
-          <button
-            type="button"
-            className="ud-menu-toggle"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open menu"
-          >
-            <HiMenu />
-          </button>
-          <div className="ud-topbar-brand">
-            <HiShieldCheck className="brand-icon" style={{ fontSize: '1.25rem' }} />
-            InsurAI
-          </div>
+          <button className="ud-menu-toggle" onClick={() => setSidebarOpen(true)}><HiMenu /></button>
+          <div className="ud-topbar-brand"><HiShieldCheck className="brand-icon" />InsurAI</div>
           <div className="ud-topbar-actions">
-            {/* Notification Bell */}
+            
+            {/* NOTIFICATION UI */}
             <div className="ud-notification-wrapper" ref={notificationRef}>
-              <button
-                type="button"
-                className="ud-notification-btn"
-                onClick={handleNotificationClick}
-                aria-label="Notifications"
-              >
+              <button className="ud-notification-btn" onClick={() => setNotificationOpen(!notificationOpen)}>
                 <HiBell />
-                {unreadCount > 0 && (
-                  <span className="ud-notification-badge">{unreadCount}</span>
-                )}
+                {unreadCount > 0 && <span className="ud-notification-badge">{unreadCount}</span>}
               </button>
 
-              {/* Notification Dropdown */}
               {notificationOpen && (
                 <div className="ud-notification-dropdown">
                   <div className="ud-notification-header">
                     <h3>Notifications</h3>
-                    {unreadCount > 0 && (
-                      <button
-                        type="button"
-                        className="ud-mark-all-read"
-                        onClick={markAllAsRead}
-                      >
-                        Mark all as read
-                      </button>
-                    )}
+                    <button 
+                      className="ud-mark-all-read" 
+                      onClick={markAllAsRead}
+                      disabled={unreadCount === 0}
+                      style={{ opacity: unreadCount === 0 ? 0.5 : 1, cursor: unreadCount === 0 ? 'default' : 'pointer' }}
+                    >
+                      Mark all as read
+                    </button>
                   </div>
 
                   <div className="ud-notification-list">
                     {notifications.length === 0 ? (
-                      <div className="ud-notification-empty">
-                        <HiBell />
-                        <p>No notifications</p>
-                      </div>
+                      <div className="ud-notification-empty"><HiBell /><p>No notifications</p></div>
                     ) : (
-                      notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={`ud-notification-item ${!notification.read ? 'unread' : ''}`}
-                          onClick={() => markAsRead(notification.id)}
-                        >
+                      notifications.map((n) => (
+                        <div key={n.id} className={`ud-notification-item ${!n.isRead ? 'unread' : ''}`} onClick={() => markAsRead(n.id, n.isRead)}>
                           <div className="ud-notification-content">
                             <div className="ud-notification-title">
-                              {notification.title}
-                              {!notification.read && <span className="ud-unread-dot"></span>}
+                              {n.title}
+                              {!n.isRead && <span className="ud-unread-dot"></span>}
                             </div>
-                            <div className="ud-notification-message">
-                              {notification.message}
-                            </div>
-                            <div className="ud-notification-time">
-                              {notification.time}
-                            </div>
+                            <div className="ud-notification-message">{n.message}</div>
+                            <div className="ud-notification-time">{formatRelativeTime(n.createdAt)}</div>
                           </div>
-                          <button
-                            type="button"
-                            className="ud-notification-close"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              clearNotification(notification.id);
-                            }}
-                            aria-label="Clear notification"
-                          >
+                          {/* DELETE BUTTON */}
+                          <button className="ud-notification-close" onClick={(e) => deleteNotification(n.id, e)}>
                             <HiX />
                           </button>
                         </div>
@@ -222,28 +166,14 @@ const DashboardLayout = ({ children, userEmail, userName, onLogout }) => {
             </div>
 
             <span className="ud-user-name">{userName || userEmail || 'User'}</span>
-            <button type="button" className="ud-logout-btn" onClick={onLogout}>
-              Logout
-            </button>
+            <button className="ud-logout-btn" onClick={onLogout}>Logout</button>
           </div>
         </header>
-
-        <main className="ud-content" key={location.pathname}>{children}</main>
+        <main className="ud-content">{children}</main>
       </div>
-
-      {sidebarOpen && (
-        <div
-          className="ud-sidebar-overlay"
-          onClick={() => setSidebarOpen(false)}
-          onKeyDown={(e) => e.key === 'Escape' && setSidebarOpen(false)}
-          role="button"
-          tabIndex={0}
-          aria-label="Close overlay"
-        />
-      )}
+      {sidebarOpen && <div className="ud-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
     </div>
   );
 };
 
 export default DashboardLayout;
-export { NAV_ITEMS };
