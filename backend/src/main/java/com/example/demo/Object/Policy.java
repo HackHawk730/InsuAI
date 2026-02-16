@@ -12,6 +12,7 @@ public class Policy {
     private String id;
 
     private String userEmail;
+    private String agentEmail;
     private String typeId;
     private String policyTypeName;
     private String status; // PENDING, APPROVED, REJECTED, CHANGES_REQUESTED
@@ -20,23 +21,52 @@ public class Policy {
     private LocalDateTime updatedAt;
     private java.util.Map<String, Object> formData;
 
-    public String getId() { return id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getUserEmail() { return userEmail; }
-    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+    public String getUserEmail() {
+        return userEmail;
+    }
 
-    public void setTypeId(String typeId) { this.typeId = typeId; }
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
 
-    public void setPolicyTypeName(String name) { this.policyTypeName = name; }
+    public String getAgentEmail() {
+        return agentEmail;
+    }
 
-    public void setFormData(java.util.Map<String, Object> data) { this.formData = data; }
+    public void setAgentEmail(String agentEmail) {
+        this.agentEmail = agentEmail;
+    }
 
-    public void setStatus(String status) { this.status = status; }
+    public void setTypeId(String typeId) {
+        this.typeId = typeId;
+    }
 
-    public void setAgentComments(String comments) { this.agentComments = comments; }
+    public void setPolicyTypeName(String name) {
+        this.policyTypeName = name;
+    }
 
-    public void setAppliedAt(java.time.LocalDateTime date) { this.appliedAt = date; }
+    public void setFormData(java.util.Map<String, Object> data) {
+        this.formData = data;
+    }
 
-    public void setUpdatedAt(java.time.LocalDateTime date) { this.updatedAt = date; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setAgentComments(String comments) {
+        this.agentComments = comments;
+    }
+
+    public void setAppliedAt(java.time.LocalDateTime date) {
+        this.appliedAt = date;
+    }
+
+    public void setUpdatedAt(java.time.LocalDateTime date) {
+        this.updatedAt = date;
+    }
 
 }

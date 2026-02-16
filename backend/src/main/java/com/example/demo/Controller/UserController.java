@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Arrays; // Added for sample data
-import java.util.Map;    // Added for sample data
+import java.util.Map; // Added for sample data
+import com.example.demo.Repo.NotificationRepo;
+import com.example.demo.Object.Notification;
 
 @RestController
 @RequestMapping("/InsureAi")
@@ -26,6 +28,9 @@ public class UserController {
 
     @Autowired
     private PolicyService policyService;
+
+    @Autowired
+    private NotificationRepo notificationRepo;
 
     // 0:SignUp Endpoint ------------------
     @PostMapping("/singup")
@@ -94,7 +99,8 @@ public class UserController {
     // 7.Apply for policies
     @PostMapping("/applyPolicy")
     public ResponseEntity<Policy> applyPolicy(@RequestBody PolicyRequest request) {
-        Policy policy = policyService.applyForPolicy(request.userEmail, request.typeId, request.policyTypeName,
+        Policy policy = policyService.applyForPolicy(request.userEmail, request.agentEmail, request.typeId,
+                request.policyTypeName,
                 request.formData);
         return ResponseEntity.ok(policy);
     }
@@ -112,8 +118,9 @@ public class UserController {
             Optional<SignupDTO> userOpt = AuthService.getUserByEmail(email);
             if (userOpt.isPresent()) {
                 SignupDTO user = userOpt.get();
-                if ("Agent".equals(user.getRole()) && user.getSpecialization() != null) {
-                    return ResponseEntity.ok(policyService.getPoliciesBySpecialization(user.getSpecialization()));
+                if ("Agent".equalsIgnoreCase(user.getRole())) {
+                    // Filter specifically for this agent
+                    return ResponseEntity.ok(policyService.getPoliciesByAgent(email));
                 }
             }
         }
@@ -153,40 +160,32 @@ public class UserController {
         java.util.Map<String, Object> stats = new java.util.HashMap<>();
         stats.put("users", AuthService.getByRole("User").size());
         stats.put("agents", AuthService.getByRole("Agent").size());
-        stats.put("policies", policyService.getAllPolicies().size());
+        stats.put("policies", policyOfferingService.getAllOfferings().size());
+        stats.put("applications", policyService.getAllPolicies().size());
         return ResponseEntity.ok(stats);
     }
 
-    // New: Agent Notifications Endpoint
-    @GetMapping("/agent/notifications")
-    public ResponseEntity<List<Map<String, Object>>> getAgentNotifications() {
-        // Sample data (replace with real DB query, e.g., from a NotificationRepo)
-        List<Map<String, Object>> notifications = Arrays.asList(
-            Map.of("id", 1, "message", "New feedback received", "type", "Feedback"),
-            Map.of("id", 2, "message", "Policy update available", "type", "Update")
-        );
-        return ResponseEntity.ok(notifications);
+
+    @Autowired
+    private com.example.demo.Service.PolicyOfferingService policyOfferingService;
+
+    // 15: Create Policy Offering (Agent)
+    @PostMapping("/createPolicyOffering")
+    public ResponseEntity<String> createPolicyOffering(@RequestBody PolicyOffering offering,
+            @RequestParam String agentEmail) {
+        String res = policyOfferingService.createPolicyOffering(offering, agentEmail);
+        return ResponseEntity.ok(res);
     }
 
-    // New: Admin Notifications Endpoint
+    // 16: Get All Policy Offerings (User/Public)
+    @GetMapping("/policyOfferings")
+    public ResponseEntity<List<PolicyOffering>> getAllPolicyOfferings() {
+        return ResponseEntity.ok(policyOfferingService.getAllOfferings());
+    }
+
+    // 17: Admin Notifications View
     @GetMapping("/admin/notifications")
-    public ResponseEntity<List<Map<String, Object>>> getAdminNotifications() {
-        // Sample data (replace with real DB query)
-        List<Map<String, Object>> notifications = Arrays.asList(
-            Map.of("id", 1, "type", "User", "message", "New user registered", "status", "Pending", "timestamp", "2023-10-01"),
-            Map.of("id", 2, "type", "Agent", "message", "Agent request approved", "status", "Approved", "timestamp", "2023-10-02")
-        );
-        return ResponseEntity.ok(notifications);
-    }
-
-    // New: Agent Feedback Endpoint
-    @GetMapping("/agent/feedback")
-    public ResponseEntity<List<Map<String, Object>>> getAgentFeedback() {
-        // Sample data (replace with real DB query)
-        List<Map<String, Object>> feedback = Arrays.asList(
-            Map.of("id", 1, "rating", 4.5, "comment", "Great service!"),
-            Map.of("id", 2, "rating", 5.0, "comment", "Excellent support.")
-        );
-        return ResponseEntity.ok(feedback);
+    public ResponseEntity<List<Notification>> getAdminNotifications() {
+        return ResponseEntity.ok(notificationRepo.findAll());
     }
 }

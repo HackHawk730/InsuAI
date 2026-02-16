@@ -68,6 +68,9 @@ const AgentRequests = () => {
         if (['confirmed', 'approved'].includes(text.toLowerCase())) {
             color = '#166534';
             bg = '#dcfce7';
+        } else if (['completed'].includes(text.toLowerCase())) {
+            color = '#1e3a8a';
+            bg = '#dbeafe';
         } else if (['rejected', 'cancelled'].includes(text.toLowerCase())) {
             color = '#991b1b';
             bg = '#fee2e2';
@@ -151,6 +154,20 @@ const AgentRequests = () => {
                                             >
                                                 <HiX size={16} />
                                                 Reject
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {req.status === 'Confirmed' && (
+                                        <div className="policy-actions" style={{ marginTop: '0px' }}>
+                                            <button
+                                                className="policy-action-btn btn-approve"
+                                                style={{ backgroundColor: '#3b82f6', borderColor: '#2563eb' }}
+                                                onClick={() => handleStatusUpdate(req.id?.toString(), 'Completed')}
+                                                disabled={processing}
+                                            >
+                                                <HiCheck size={16} />
+                                                Mark as Complete
                                             </button>
                                         </div>
                                     )}

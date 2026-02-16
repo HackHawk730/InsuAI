@@ -1,10 +1,46 @@
 import React, { useState } from 'react';
 import { HiChevronRight } from 'react-icons/hi';
+import StarRating from '../StarRating';
+import { submitFeedback } from '../../services/api';
 import './shared.css';
 import './MyAppointments.css';
 
-const MyAppointments = ({ appointments, onReschedule }) => {
+const MyAppointments = ({ appointments, onReschedule, userEmail, onFeedbackSubmitted }) => {
   const [detail, setDetail] = useState(null);
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleFeedbackSubmit = async () => {
+    if (feedbackRating === 0) {
+      alert("Please select a rating");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await submitFeedback({
+        appointmentId: detail.slot.id,
+        userEmail: userEmail,
+        agentEmail: detail.agent.email,
+        rating: feedbackRating,
+        comment: feedbackComment
+      });
+      if (res.success) {
+        alert("Thank you for your feedback!");
+        setDetail(null);
+        setFeedbackRating(0);
+        setFeedbackComment("");
+        onFeedbackSubmitted?.();
+      } else {
+        alert("Failed to submit feedback: " + res.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred during feedback submission.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="ud-my-appointments">
@@ -35,7 +71,7 @@ const MyAppointments = ({ appointments, onReschedule }) => {
 
             return (
               <div
-                key={slot.id || `${agent.email}-${slot.day}-${slot.startTime}-${idx}`}
+                key={slot.id || `${agent.email}-${idx}`}
                 className="ud-appointment-item ud-card"
                 role="button"
                 tabIndex={0}
@@ -70,6 +106,19 @@ const MyAppointments = ({ appointments, onReschedule }) => {
                   </div>
                 </div>
                 <div className="ud-appointment-actions">
+                  {status === 'completed' && (
+                    <button
+                      type="button"
+                      className="ud-btn-primary ud-btn-sm"
+                      style={{ marginRight: '10px' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDetail({ agent, slot });
+                      }}
+                    >
+                      Feedback
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="ud-btn-secondary ud-btn-sm"
@@ -88,26 +137,58 @@ const MyAppointments = ({ appointments, onReschedule }) => {
       )}
 
       {detail && (
-        <div className="ud-modal-backdrop" onClick={() => setDetail(null)}>
+        <div className="ud-modal-backdrop" onClick={() => {
+          setDetail(null);
+          setFeedbackRating(0);
+          setFeedbackComment("");
+        }}>
           <div className="ud-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Appointment details</h3>
             <p><strong>{detail.agent.name || detail.agent.email}</strong> · {detail.agent.email}</p>
             <p>{detail.slot.day} {detail.slot.date ? `(${detail.slot.date})` : ''} · {detail.slot.startTime} – {detail.slot.endTime} · {detail.slot.appointmentType}</p>
             {detail.slot.userNote && <p className="ud-appointment-note">Note: {detail.slot.userNote}</p>}
+
+            {(detail.slot.status === 'COMPLETED' || detail.slot.status === 'Completed') && (
+              <div className="ud-feedback-section" style={{ marginTop: '20px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', textAlign: 'left' }}>
+                <h4 style={{ marginBottom: '10px', color: '#60a5fa' }}>Give Feedback</h4>
+                <StarRating rating={feedbackRating} onRatingChange={setFeedbackRating} />
+                <textarea
+                  placeholder="Share your experience with this agent..."
+                  value={feedbackComment}
+                  onChange={(e) => setFeedbackComment(e.target.value)}
+                  style={{ width: '100%', marginTop: '10px', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', padding: '10px', color: '#fff', minHeight: '80px', resize: 'none' }}
+                />
+                <button
+                  className="ud-btn-primary"
+                  style={{ marginTop: '10px', width: '100%' }}
+                  onClick={handleFeedbackSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                </button>
+              </div>
+            )}
+
             <div className="ud-modal-actions">
-              <button type="button" className="ud-btn-secondary" onClick={() => setDetail(null)}>
+              <button type="button" className="ud-btn-secondary" onClick={() => {
+                setDetail(null);
+                setFeedbackRating(0);
+                setFeedbackComment("");
+              }}>
                 Close
               </button>
-              <button
-                type="button"
-                className="ud-btn-primary"
-                onClick={() => {
-                  setDetail(null);
-                  onReschedule?.(detail);
-                }}
-              >
-                Reschedule
-              </button>
+              {detail.slot.status !== 'COMPLETED' && detail.slot.status !== 'Completed' && (
+                <button
+                  type="button"
+                  className="ud-btn-primary"
+                  onClick={() => {
+                    setDetail(null);
+                    onReschedule?.(detail);
+                  }}
+                >
+                  Reschedule
+                </button>
+              )}
             </div>
           </div>
         </div>

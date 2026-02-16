@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ScheduleRepo extends MongoRepository<Schedule, String> {
     List<Schedule> findByAgentEmail(String agentEmail);
+
+    List<Schedule> findAllByDate(java.time.LocalDate date);
 }

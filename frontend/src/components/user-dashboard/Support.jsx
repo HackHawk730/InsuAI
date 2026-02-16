@@ -1,27 +1,110 @@
-import React from 'react';
-import { HiSupport } from 'react-icons/hi';
+import React, { useState, useEffect, useRef } from 'react';
+import { HiSupport, HiPaperAirplane, HiUser, HiChatAlt2, HiSparkles } from 'react-icons/hi';
+import { generateAIChatResponse } from '../../services/api';
 import './shared.css';
+import './Support.css';
 
-const Support = () => (
-  <div className="ud-support">
-    <h1 className="ud-page-title">Support / Help</h1>
-    <p className="ud-page-subtitle">
-      Get assistance with your policies, appointments, or account.
-    </p>
-    <div className="ud-card ud-support-card">
-      <div className="ud-metric-icon blue" style={{ marginBottom: 16 }}>
-        <HiSupport />
+const Support = ({ messages, setMessages }) => {
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, isTyping]);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const userMessageText = input.trim();
+    const userMessage = {
+      id: Date.now(),
+      type: 'user',
+      text: userMessageText,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsTyping(true);
+
+    // Call Real OpenAI API
+    const response = await generateAIChatResponse(userMessageText, messages);
+
+    setMessages(prev => [...prev, {
+      id: Date.now() + 1,
+      type: 'bot',
+      text: response.success ? response.text : response.message,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }]);
+
+    setIsTyping(false);
+  };
+
+
+  return (
+    <div className="ud-support-container">
+      <div className="ud-support-header">
+        <h1 className="ud-page-title">InsuAI Assistant</h1>
+        <p className="ud-page-subtitle">Your real-time insurance support partner.</p>
       </div>
-      <h3 style={{ margin: '0 0 8px 0', fontSize: '1.125rem', fontWeight: 800, color: '#f1f5f9' }}>
-        Contact us
-      </h3>
-      <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.9375rem', lineHeight: 1.6 }}>
-        Email: support@insurai.com<br />
-        Phone: 1-800-INSURE-AI<br />
-        Hours: Mon–Fri 9am–6pm
-      </p>
+
+      <div className="ud-chat-card">
+        <div className="ud-chat-messages" ref={scrollRef}>
+          {messages.map((msg) => (
+            <div key={msg.id} className={`chat-bubble-wrapper ${msg.type}`}>
+              <div className="chat-avatar">
+                {msg.type === 'bot' ? <HiSparkles className="icon-bot" /> : <HiUser />}
+              </div>
+              <div className="chat-bubble">
+                <p className="chat-text">{msg.text}</p>
+                <span className="chat-time">{msg.timestamp}</span>
+              </div>
+            </div>
+          ))}
+          {isTyping && (
+            <div className="chat-bubble-wrapper bot">
+              <div className="chat-avatar"><HiSparkles className="icon-bot" /></div>
+              <div className="chat-bubble typing">
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <form className="ud-chat-input-area" onSubmit={handleSend}>
+          <input
+            type="text"
+            className="ud-chat-input"
+            placeholder="Type your message here..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <button type="submit" className="ud-chat-send-btn">
+            <HiPaperAirplane />
+          </button>
+        </form>
+      </div>
+
+      <div className="ud-support-info-grid">
+        <div className="ud-card ud-support-card miniature">
+          <div className="ud-metric-icon blue"><HiSupport /></div>
+          <h4>Human Support</h4>
+          <p>Email: insurai02@gmail.com<br />Phone: 1-800-INSURE-AI</p>
+        </div>
+        <div className="ud-card ud-support-card miniature">
+          <div className="ud-metric-icon green"><HiChatAlt2 /></div>
+          <h4>Live Chat</h4>
+          <p>Average wait: &lt; 2 mins<br />Available 24/7</p>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Support;

@@ -43,7 +43,7 @@ const SystemAgents = () => {
                     <h1 className="ud-page-title">System Agents</h1>
                     <p className="ud-page-subtitle">Meet our certified insurance professionals ready to assist you.</p>
                 </div>
-                <div className="search-bar">
+                <div className="search-bar" style={{ display: 'flex', gap: '10px' }}>
                     <input
                         type="text"
                         placeholder="Search by name, company, or specialization..."
@@ -51,6 +51,7 @@ const SystemAgents = () => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="ud-input"
                     />
+                    <button className="ud-btn-secondary" onClick={() => window.location.reload()}>Refresh</button>
                 </div>
             </header>
 
@@ -91,13 +92,19 @@ const SystemAgents = () => {
 
                                     <div className="agent-stats">
                                         <div className="stat">
-                                            <HiStar className="star-icon" />
-                                            <span style={{ color: 'white' }}>{agent.rating?.toFixed(1) || '4.5'}</span>
+                                            {agent.rating > 0 ? (
+                                                <>
+                                                    <HiStar className="star-icon" />
+                                                    <span style={{ color: 'white' }}>{agent.rating?.toFixed(1)}</span>
+                                                </>
+                                            ) : (
+                                                <span className="ud-new-badge">NEW</span>
+                                            )}
                                         </div>
                                         <div className="stat-divider"></div>
                                         <div className="stat">
                                             <span className="stat-label">Experience</span>
-                                            <span className="stat-value">5+ Years</span>
+                                            <span className="stat-value">No Experience</span>
                                         </div>
                                     </div>
 

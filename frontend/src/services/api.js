@@ -230,10 +230,11 @@ export const fetchAgentRequests = async (email) => {
   }
 };
 
-export const applyForPolicy = async (userEmail, typeId, policyTypeName, formData) => {
+export const applyForPolicy = async (userEmail, agentEmail, typeId, policyTypeName, formData) => {
   try {
     const response = await api.post('/applyPolicy', {
       userEmail,
+      agentEmail,
       typeId,
       policyTypeName,
       formData
@@ -379,5 +380,133 @@ export const fetchAllAppointments = async () => {
   }
 };
 
-export default api;
+export const createPolicyOffering = async (offeringData, agentEmail) => {
+  try {
+    const response = await api.post(`/createPolicyOffering?agentEmail=${encodeURIComponent(agentEmail)}`, offeringData);
+    return {
+      success: true,
+      message: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data || error.message || 'Failed to create policy offering'
+    };
+  }
+};
 
+export const getPolicyOfferings = async () => {
+  try {
+    const response = await api.get('/policyOfferings');
+    return {
+      success: true,
+      offerings: response.data || []
+    };
+  } catch (error) {
+    return {
+      success: false,
+      offerings: [],
+      message: error.response?.data || error.message || 'Failed to fetch policy offerings'
+    };
+  }
+};
+
+export const submitFeedback = async (feedbackData) => {
+  try {
+    const response = await api.post('/feedback/submit', feedbackData);
+    return {
+      success: true,
+      feedback: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data || error.message || 'Failed to submit feedback'
+    };
+  }
+};
+
+export const fetchAgentFeedback = async (email) => {
+  try {
+    const response = await api.get(`/feedback/agent/${encodeURIComponent(email)}`);
+    return {
+      success: true,
+      feedback: response.data || []
+    };
+  } catch (error) {
+    return {
+      success: false,
+      feedback: [],
+      message: error.response?.data || error.message || 'Failed to fetch agent feedback'
+    };
+  }
+};
+
+export const fetchAllFeedback = async () => {
+  try {
+    const response = await api.get('/feedback/all');
+    return {
+      success: true,
+      feedback: response.data || []
+    };
+  } catch (error) {
+    return {
+      success: false,
+      feedback: [],
+      message: error.response?.data || error.message || 'Failed to fetch all feedback'
+    };
+  }
+};
+
+export const generateAIChatResponse = async (userMessage) => {
+  const lowText = userMessage.toLowerCase().trim();
+
+  const qaData = {
+    "hello": "Hello! I am your InsuAI Assistant. I can help you with policy inquiries, recommendations, and general insurance questions. How can I assist you today?",
+    "hi": "Hi there! How can I help you with your insurance needs today?",
+    "hey": "Hey! How can I assist you today?",
+
+    "general policy inquiry": "We offer a wide range of insurance products including Health, Life, Auto, and Corporate plans. You can view all our active offerings in the 'Policy Offerings' section. Is there a specific type you're interested in?",
+
+    "what insurance policies are available?": "Currently, we have Comprehensive Health Insurance, Term Life Protection, Premium Auto Insurance, and specialized Business Coverage available. Each plan is designed to provide maximum security for your specific needs.",
+
+    "show me all health insurance plans": "Our health plans include: 1. Individual Star Health, 2. Family Floater Plus, and 3. Senior Citizen Care. These plans cover hospitalization, pre-existing diseases (after waiting period), and regular health check-ups.",
+
+    "what is the best policy for senior citizens?": "For senior citizens, we highly recommend our 'Senior Citizen Care' policy. It features lower waiting periods for pre-existing diseases, cashless hospitalization across 5000+ hospitals, and dedicated support for elderly claims.",
+
+    "do you offer corporate insurance plans?": "Yes, we offer Group Health and Liability insurance for corporations. Our plans include employee wellness programs and simplified claim processing for HR departments. Would you like to speak to a corporate specialist?",
+
+    "what documents are required to apply for a policy?": "To apply, you typically need: 1. A valid Govt ID (Aadhar/Passport), 2. Address Proof, 3. Income Proof (for Life Insurance), and 4. Recent medical reports (if applicable for health plans over age 45).",
+
+    "suggest a health insurance plan for a 35-year-old": "For a 35-year-old, the 'Individual Star Health' plan is ideal. It offers a high sum insured with low premiums, restoration benefits, and covers modern treatments. It's the perfect balance of cost and coverage.",
+
+    "which policy is best for my family?": "The 'Family Floater Plus' is our top recommendation for families. It covers you, your spouse, and up to 3 children under a single sum insured, making it more cost-effective than individual policies.",
+
+    "i want low premium and high coverage, what do you suggest?": "If you're looking for value, our 'Direct Benefit' plans offer competitive premiums by focusing on core coverages. You can also opt for a higher deductible to significantly lower your annual premium.",
+
+    "recommend a policy for critical illness coverage": "Our 'Critical Illness Rider' can be added to any Health or Life policy. It provides a lump sum payment upon diagnosis of 30+ critical illnesses, including cancer and heart stroke, to help with treatment costs.",
+
+    "what insurance plan is suitable for small businesses?": "The 'SME Protector' plan is designed specifically for small businesses. It covers fire, theft, and public liability, ensuring your business assets and reputation remain secure during unforeseen events."
+  };
+
+  // Simulate a small delay for a natural feel
+  await new Promise(resolve => setTimeout(resolve, 800));
+
+  // Find exact match or keyword match
+  const match = Object.keys(qaData).find(key => lowText.includes(key));
+
+  if (match) {
+    return {
+      success: true,
+      text: qaData[match]
+    };
+  }
+
+  // Fallback
+  return {
+    success: true,
+    text: "That's a great question! While I don't have a specific answer for that in my current database, I can help you with policy inquiries, health plans, or document requirements. Would you like to see our available policies?"
+  };
+};
+
+export default api;

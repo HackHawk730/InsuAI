@@ -41,7 +41,7 @@ const AdminPolicies = () => {
 
     return (
         <div className="agent-subpage">
-            <h2 className="subpage-title">Final Policy Clearance</h2>
+            <h2 className="subpage-title">All Policies</h2>
             <div className="card">
                 {loading && <p>Loading system records...</p>}
                 {!loading && error && <p className="error-msg">{error}</p>}
@@ -55,7 +55,7 @@ const AdminPolicies = () => {
                                 <th style={{ padding: '12px', color: '#94a3b8', fontSize: '0.75rem', textTransform: 'uppercase' }}>Type</th>
                                 <th style={{ padding: '12px', color: '#94a3b8', fontSize: '0.75rem', textTransform: 'uppercase' }}>Applicant</th>
                                 <th style={{ padding: '12px', color: '#94a3b8', fontSize: '0.75rem', textTransform: 'uppercase' }}>Status</th>
-                                <th style={{ padding: '12px', color: '#94a3b8', fontSize: '0.75rem', textTransform: 'uppercase' }}>Actions</th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -78,30 +78,7 @@ const AdminPolicies = () => {
                                             {p.status}
                                         </span>
                                     </td>
-                                    <td style={{ padding: '16px 12px' }}>
-                                        {p.status === 'AGENT_APPROVED' ? (
-                                            <div style={{ display: 'flex', gap: '8px' }}>
-                                                <button
-                                                    onClick={() => handleFinalAction(p.id, 'APPROVED')}
-                                                    className="policy-action-btn btn-approve"
-                                                    disabled={updating === p.id}
-                                                    style={{ padding: '4px 12px' }}
-                                                >
-                                                    <HiCheck /> Final Seal
-                                                </button>
-                                                <button
-                                                    onClick={() => handleFinalAction(p.id, 'REJECTED')}
-                                                    className="policy-action-btn btn-reject"
-                                                    disabled={updating === p.id}
-                                                    style={{ padding: '4px 12px' }}
-                                                >
-                                                    <HiX /> Terminate
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <span style={{ color: '#475569', fontSize: '0.75rem' }}>No Action Required</span>
-                                        )}
-                                    </td>
+
                                 </tr>
                             ))}
                         </tbody>

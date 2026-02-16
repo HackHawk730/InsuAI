@@ -20,7 +20,7 @@ public class NotificationService {
         note.setType(type); // "INFO", "SUCCESS", "ALERT"
         note.setCreatedAt(LocalDateTime.now());
         note.setRead(false);
-        
+
         notificationRepo.save(note);
     }
 }

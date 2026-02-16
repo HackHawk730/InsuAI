@@ -10,8 +10,6 @@ const getSpecialization = (agent) => {
   return agent?.specialization || SPECIALIZATIONS[idx];
 };
 
-const getRating = (agent) => agent?.rating ?? (3.5 + (Math.abs((agent?.email || 'a').charCodeAt(0) % 10) / 10));
-
 const BookAppointment = ({ userEmail, onBooked }) => {
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +40,7 @@ const BookAppointment = ({ userEmail, onBooked }) => {
     return (agents || []).map((a) => ({
       ...a,
       specialization: getSpecialization(a),
-      rating: getRating(a),
+      rating: a.rating || 0,
     }));
   }, [agents]);
 
@@ -171,10 +169,14 @@ const BookAppointment = ({ userEmail, onBooked }) => {
                   <h3>{agent.name || 'Agent'}</h3>
                   <p>{agent.email}</p>
                   <span className="ud-agent-badge">{agent.specialization}</span>
-                  <div className="ud-agent-rating">
-                    <HiStar />
-                    <span>{agent.rating?.toFixed(1)}</span>
-                  </div>
+                  {agent.rating > 0 ? (
+                    <div className="ud-agent-rating">
+                      <HiStar />
+                      <span>{agent.rating?.toFixed(1)}</span>
+                    </div>
+                  ) : (
+                    <span className="ud-new-badge">NEW</span>
+                  )}
                   <span className="ud-agent-verified">
                     <HiBadgeCheck /> Verified by Authority
                   </span>
@@ -188,7 +190,7 @@ const BookAppointment = ({ userEmail, onBooked }) => {
                 )}
                 {agent.agentSchedule && agent.agentSchedule.length > 0 && (
                   <div className="ud-slot-grid">
-                    {agent.agentSchedule.map((slot) => {
+                    {agent.agentSchedule.map((slot, index) => {
                       const available = (slot.status || '').toLowerCase() === 'available';
                       const isMine =
                         (slot.bookedByUserEmail || '').trim().toLowerCase() ===
@@ -196,7 +198,7 @@ const BookAppointment = ({ userEmail, onBooked }) => {
 
                       return (
                         <button
-                          key={slot.id || `${agent.email}-${slot.date}-${slot.startTime}`}
+                          key={slot.id || `${agent.email}-${slot.date}-${slot.startTime}-${index}`}
                           type="button"
                           className={`ud-slot ${available ? 'available' : 'booked'}`}
                           disabled={!available || bookingLoading}

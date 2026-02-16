@@ -41,7 +41,7 @@ const AgentPolicies = ({ userEmail }) => {
 
         setUpdating(actionPolicyId);
         let status = 'PENDING';
-        if (actionType === 'approve') status = 'AGENT_APPROVED';
+        if (actionType === 'approve') status = 'APPROVED';
         else if (actionType === 'reject') status = 'REJECTED';
         else if (actionType === 'comment') status = 'CHANGES_REQUESTED';
 

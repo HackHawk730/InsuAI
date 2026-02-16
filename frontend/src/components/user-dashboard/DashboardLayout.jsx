@@ -40,7 +40,7 @@ const DashboardLayout = ({ children, userEmail, userName, onLogout }) => {
   const fetchNotifications = async () => {
     if (!userEmail) return;
     try {
-      const response = await axios.get(`http://localhost:9090/api/notifications/${userEmail}`);
+      const response = await axios.get(`http://localhost:9090/InsureAi/notifications/${userEmail}`);
       setNotifications(response.data);
     } catch (error) {
       console.error("Error fetching notifications");
@@ -53,13 +53,24 @@ const DashboardLayout = ({ children, userEmail, userName, onLogout }) => {
     return () => clearInterval(interval);
   }, [userEmail]);
 
+  // Click Outside Listener
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setNotificationOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // 2. Mark Single as Read
   const markAsRead = async (id, currentStatus) => {
     if (currentStatus) return;
     // Optimistic UI Update
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     try {
-      await axios.put(`http://localhost:9090/api/notifications/read/${id}`);
+      await axios.put(`http://localhost:9090/InsureAi/notifications/read/${id}`);
     } catch (error) {
       console.error("Failed to mark read");
     }
@@ -72,9 +83,9 @@ const DashboardLayout = ({ children, userEmail, userName, onLogout }) => {
 
     // Optimistic UI Update
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-    
+
     try {
-      await Promise.all(unreadIds.map(id => axios.put(`http://localhost:9090/api/notifications/read/${id}`)));
+      await Promise.all(unreadIds.map(id => axios.put(`http://localhost:9090/InsureAi/notifications/read/${id}`)));
     } catch (error) {
       console.error("Failed to mark all read");
     }
@@ -83,12 +94,12 @@ const DashboardLayout = ({ children, userEmail, userName, onLogout }) => {
   // 4. Delete Notification (The 'X' Button)
   const deleteNotification = async (id, e) => {
     e.stopPropagation(); // Stop click from triggering "markAsRead"
-    
+
     // Optimistic UI Update (Remove instantly)
     setNotifications(prev => prev.filter(n => n.id !== id));
-    
+
     try {
-      await axios.delete(`http://localhost:9090/api/notifications/${id}`);
+      await axios.delete(`http://localhost:9090/InsureAi/notifications/${id}`);
     } catch (error) {
       console.error("Failed to delete notification:", error);
     }
@@ -117,7 +128,7 @@ const DashboardLayout = ({ children, userEmail, userName, onLogout }) => {
           <button className="ud-menu-toggle" onClick={() => setSidebarOpen(true)}><HiMenu /></button>
           <div className="ud-topbar-brand"><HiShieldCheck className="brand-icon" />InsurAI</div>
           <div className="ud-topbar-actions">
-            
+
             {/* NOTIFICATION UI */}
             <div className="ud-notification-wrapper" ref={notificationRef}>
               <button className="ud-notification-btn" onClick={() => setNotificationOpen(!notificationOpen)}>
@@ -129,8 +140,8 @@ const DashboardLayout = ({ children, userEmail, userName, onLogout }) => {
                 <div className="ud-notification-dropdown">
                   <div className="ud-notification-header">
                     <h3>Notifications</h3>
-                    <button 
-                      className="ud-mark-all-read" 
+                    <button
+                      className="ud-mark-all-read"
                       onClick={markAllAsRead}
                       disabled={unreadCount === 0}
                       style={{ opacity: unreadCount === 0 ? 0.5 : 1, cursor: unreadCount === 0 ? 'default' : 'pointer' }}

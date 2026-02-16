@@ -10,7 +10,6 @@ const getPolicyMeta = (typeId) => POLICY_TYPES.find((p) => p.id === typeId) || {
 const getTrackingState = (policy) => {
   const status = (policy.status || '').toUpperCase();
   const isQuery = status.includes('QUERY') || status.includes('CLARIFICATION') || status.includes('CHANGES_REQUESTED');
-  const isAgentApproved = status.includes('AGENT_APPROVED');
   const isFinalApproved = status === 'APPROVED' || status === 'FINAL_APPROVED';
 
   const stages = [
@@ -18,19 +17,15 @@ const getTrackingState = (policy) => {
     { id: 2, label: 'Under Review', desc: 'Our team is reviewing your details.' },
     // Only show stage 3 if currently in query state
     ...(isQuery ? [{ id: 3, label: 'Clarification Needed', desc: 'Agent has requested more information.' }] : []),
-    { id: 4, label: 'Approved by Agent', desc: 'Agent has verified and approved your request.' },
-    { id: 5, label: 'Approved by Authority Admin', desc: 'Final administrative seal and policy issuance.' }
+    { id: 4, label: 'Approved', desc: 'Policy has been verified and approved.' }
   ];
 
   let currentStep = 1;
   let percent = 20;
 
   if (isFinalApproved) {
-    currentStep = 6; // Beyond last step to mark all as completed
+    currentStep = 5; // Beyond last step to mark all as completed
     percent = 100;
-  } else if (isAgentApproved) {
-    currentStep = 5; // On the Admin step (last one)
-    percent = 80;
   } else if (isQuery) {
     currentStep = 3;
     percent = 60;

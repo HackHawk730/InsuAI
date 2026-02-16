@@ -31,6 +31,9 @@ public class AgentService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private com.example.demo.Repo.FeedbackRepo feedbackRepo;
+
     // Agent Scheduling Service ----------------
     public String agentScheduling(Schedule schedule, String email) {
 
@@ -68,6 +71,23 @@ public class AgentService {
             List<Schedule> schedules = scheduleRepo.findByAgentEmail(agent.getEmail());
             res.setAgentSchedule(schedules);
 
+            // Calculate Rating -----------------------
+            List<com.example.demo.Object.Feedback> feedbacks = feedbackRepo.findByAgentEmail(agent.getEmail());
+            if (feedbacks != null && !feedbacks.isEmpty()) {
+                double avg = feedbacks.stream()
+                        .mapToInt(com.example.demo.Object.Feedback::getRating)
+                        .average()
+                        .orElse(0.0);
+
+                // Round to 1 decimal place (e.g., 4.666 -> 4.7)
+                double roundedAvg = Math.round(avg * 10.0) / 10.0;
+                res.setRating(roundedAvg);
+                System.out.println(
+                        "Agent: " + agent.getEmail() + " | Feedbacks: " + feedbacks.size() + " | Avg: " + roundedAvg);
+            } else {
+                res.setRating(0.0);
+            }
+
             return res;
         }).collect(Collectors.toList());
     }
@@ -100,12 +120,16 @@ public class AgentService {
 
         // --- ADDED: NOTIFICATION LOGIC ---
         // 1. Notify Agent
-        notificationRepo.save(new Notification(agentEmail, "New Appointment Request", "User " + userEmail + " booked a slot on " + s.getDate(), "INFO"));
-        emailService.sendEmail(agentEmail, "New Appointment Booking", "You have a new appointment with " + userEmail + ".\nNote: " + userNote);
+        notificationRepo.save(new Notification(agentEmail, "New Appointment Request",
+                "User " + userEmail + " booked a slot on " + s.getDate(), "INFO"));
+        emailService.sendEmail(agentEmail, "New Appointment Booking",
+                "You have a new appointment with " + userEmail + ".\nNote: " + userNote);
 
         // 2. Notify User
-        notificationRepo.save(new Notification(userEmail, "Booking Confirmed", "Your appointment with " + agentEmail + " is confirmed.", "SUCCESS"));
-        emailService.sendEmail(userEmail, "Appointment Confirmation", "Your appointment is confirmed for " + s.getDate() + " at " + startTime);
+        notificationRepo.save(new Notification(userEmail, "Booking Confirmed",
+                "Your appointment with " + agentEmail + " is confirmed.", "SUCCESS"));
+        emailService.sendEmail(userEmail, "Appointment Confirmation",
+                "Your appointment is confirmed for " + s.getDate() + " at " + startTime);
         // ---------------------------------
 
         return "Slot booked successfully";
@@ -136,9 +160,10 @@ public class AgentService {
 
         // --- ADDED: NOTIFICATION LOGIC ---
         // Notify User about the change
-        if(s.getBookedByUserEmail() != null) {
+        if (s.getBookedByUserEmail() != null) {
             String type = "CONFIRMED".equalsIgnoreCase(newStatus) ? "SUCCESS" : "WARNING";
-            notificationRepo.save(new Notification(s.getBookedByUserEmail(), "Appointment Update", "Agent has marked your appointment as " + newStatus, type));
+            notificationRepo.save(new Notification(s.getBookedByUserEmail(), "Appointment Update",
+                    "Agent has marked your appointment as " + newStatus, type));
             emailService.sendEmail(s.getBookedByUserEmail(), "Appointment Update", "Status changed to: " + newStatus);
         }
         // ---------------------------------

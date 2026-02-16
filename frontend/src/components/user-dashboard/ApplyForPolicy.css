@@ -116,3 +116,68 @@
   font-weight: 700;
   color: #f1f5f9;
 }
+
+/* Dynamic Policy Card Styles */
+.dynamic-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.ud-policy-tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.ud-offered-by {
+  width: 100%;
+  padding-top: 16px;
+  margin-top: auto;
+  margin-bottom: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.offered-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: #94a3b8;
+}
+
+.offered-icon {
+  font-size: 1rem;
+  color: #60a5fa;
+}
+
+.offered-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ud-policy-name {
+  margin-top: 8px !important;
+}
+
+.ud-loading,
+.ud-empty {
+  text-align: center;
+  padding: 60px;
+  color: #94a3b8;
+  background: rgba(30, 41, 59, 0.2);
+  border-radius: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}

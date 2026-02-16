@@ -1,19 +1,8 @@
-import React, { useState, useEffect } from 'react';  // Added useState and useEffect
-import { HiClipboardList, HiCalendar, HiDocumentText } from 'react-icons/hi';
-import axios from 'axios';  // Added for API calls
-import StarRatings from 'react-star-ratings';  // Added for star ratings
+import React from 'react';
+import { HiClipboardList, HiCalendar, HiDocumentText, HiPlusCircle } from 'react-icons/hi';
 import './AgentDashboardLayout.css';
 
 const AgentHome = ({ userName, specialization, company, onNavigate }) => {
-    const [feedback, setFeedback] = useState([]);  // Added state for feedback
-
-    useEffect(() => {
-        // Fetch feedback on load
-        axios.get('/InsureAi/agent/feedback')  // Updated: Changed from /api/ to /InsureAi/
-            .then(response => setFeedback(response.data))
-            .catch(err => console.log('Error fetching feedback:', err));
-    }, []);
-
     return (
         <div className="dashboard-home">
             <h1 style={{ marginBottom: '0.75rem', color: 'white' }}>Welcome, {userName}</h1>
@@ -73,30 +62,21 @@ const AgentHome = ({ userName, specialization, company, onNavigate }) => {
                         <p>Review submitted policies</p>
                     </div>
                 </div>
-            </div>
 
-            {/* Added: Feedback Section */}
-            <div style={{ marginTop: '2rem' }}>
-                <h2 style={{ color: 'white' }}>My Feedback</h2>
-                {feedback.length > 0 ? (
-                    feedback.map(f => (
-                        <div key={f.id} style={{ margin: '10px 0', border: '1px solid #ddd', padding: '10px', background: '#f9f9f9' }}>
-                            <StarRatings
-                                rating={f.rating}
-                                starRatedColor="gold"
-                                numberOfStars={5}
-                                starDimension="20px"
-                                starSpacing="2px"
-                            />
-                            <p>{f.comment}</p>
-                        </div>
-                    ))
-                ) : (
-                    <p style={{ color: 'white' }}>No feedback available</p>
-                )}
+                <div
+                    className="stat-card"
+                    onClick={() => onNavigate('publish')}
+                    style={{ cursor: 'pointer' }}
+                >
+                    <div className="stat-icon-wrapper" style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#4ade80' }}>
+                        <HiPlusCircle />
+                    </div>
+                    <div className="stat-info">
+                        <h3>Publish Policy</h3>
+                        <p>Create new policy offerings</p>
+                    </div>
+                </div>
             </div>
-
-            {/* Can add Recent Activity section here later */}
         </div>
     );
 };

@@ -13,4 +13,6 @@ public interface PolicyRepo extends MongoRepository<Policy, String> {
     List<Policy> findByStatus(String status);
 
     List<Policy> findByPolicyTypeNameStartingWithIgnoreCase(String specialization);
+
+    List<Policy> findByAgentEmail(String agentEmail);
 }

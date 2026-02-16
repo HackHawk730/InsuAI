@@ -30,6 +30,16 @@ const Dashboard = ({ onLogout }) => {
   const [loading, setLoading] = useState(true);
   const [myPolicies, setMyPolicies] = useState([]);
 
+  // Persist chat messages across views
+  const [chatMessages, setChatMessages] = useState([
+    {
+      id: 1,
+      type: 'bot',
+      text: "Hello! I'm your InsuAI Assistant. How can I help you with your policies, claims, or appointments today?",
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
+  ]);
+
   const loadPolicies = useCallback(async () => {
     if (!userEmail) return;
     try {
@@ -140,12 +150,17 @@ const Dashboard = ({ onLogout }) => {
             <MyAppointments
               appointments={myAppointments}
               onReschedule={handleReschedule}
+              userEmail={userEmail}
+              onFeedbackSubmitted={loadAgents}
             />
           }
         />
         <Route path="policies" element={<MyPolicies policies={myPolicies} />} />
-        <Route path="support" element={<Support />} />
-        <Route path="settings" element={<Settings />} />
+        <Route
+          path="support"
+          element={<Support messages={chatMessages} setMessages={setChatMessages} />}
+        />
+        <Route path="settings" element={<Settings userName={userName} userEmail={userEmail} />} />
         <Route path="*" element={<Navigate to="" replace />} />
       </Routes>
     </DashboardLayout>

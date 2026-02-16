@@ -8,6 +8,7 @@ import {
     HiMenu,
     HiX,
     HiCalendar,
+    HiChatAlt2,
 } from 'react-icons/hi';
 import { NavLink, useLocation } from 'react-router-dom';
 import '../agent-dashboard/AgentDashboardLayout.css'; // Reuse styles but with admin tweaks
@@ -15,14 +16,15 @@ import './AdminDashboardLayout.css';
 
 const NAV_ITEMS = [
     { id: 'home', label: 'Admin Overview', icon: HiHome, path: '/admin-dashboard' },
-    { id: 'policies', label: 'Final Approvals', icon: HiShieldCheck, path: '/admin-dashboard/policies' },
+    { id: 'policies', label: 'All Policies', icon: HiShieldCheck, path: '/admin-dashboard/policies' },
     { id: 'appointments', label: 'Appointments', icon: HiCalendar, path: '/admin-dashboard/appointments' },
     { id: 'users', label: 'System Users', icon: HiUserGroup, path: '/admin-dashboard/users' },
     { id: 'agents', label: 'System Agents', icon: HiUserGroup, path: '/admin-dashboard/agents' },
+    { id: 'feedback', label: 'Quality Review', icon: HiChatAlt2, path: '/admin-dashboard/feedback' },
     { id: 'analytics', label: 'Core Analytics', icon: HiChartBar, path: '/admin-dashboard/analytics' },
 ];
 
-const AdminDashboardLayout = ({ children, userEmail, userName, onLogout }) => {
+const AdminDashboardLayout = ({ children, userEmail, userName, onLogout, notifications }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const location = useLocation();
 
@@ -73,6 +75,7 @@ const AdminDashboardLayout = ({ children, userEmail, userName, onLogout }) => {
                     </button>
                     <div className="ad-topbar-brand">Administrative Authority</div>
                     <div className="ad-topbar-actions">
+                        {notifications}
                         <div className="admin-status">
                             <span className="status-label">System Online</span>
                             <div className="pulse-dot"></div>

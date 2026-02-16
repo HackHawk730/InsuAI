@@ -2,7 +2,6 @@ package com.example.demo.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,11 +45,16 @@ public class Securityconfig {
                                 "/actuator/**",
                                 "/InsureAi/allSchedules/**",
                                 "/InsureAi/agent/notifications/**",
+                                "/InsureAi/admin/notifications",
                                 "/InsureAi/admin/notifications/**",
                                 "/InsureAi/agent/feedback/**",
-                                "/api/notifications/**")
+                                "/InsureAi/notifications/**",
+                                "/InsureAi/feedback/**",
+                                "/api/notifications/**",
+                                "/InsureAi/createPolicyOffering",
+                                "/InsureAi/policyOfferings")
                         .permitAll()// allow these
-                        
+
                         .anyRequest().authenticated());
 
         return http.build();
