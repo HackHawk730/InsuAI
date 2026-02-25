@@ -31,3 +31,5 @@ build/
 
 # Confidential
 backend/src/main/resources/application.properties
+frontend/.env
+frontend/http-client.private.env.json
