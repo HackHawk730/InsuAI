@@ -458,55 +458,88 @@ export const fetchAllFeedback = async () => {
   }
 };
 
-export const generateAIChatResponse = async (userMessage) => {
-  const lowText = userMessage.toLowerCase().trim();
+export const generateAIChatResponse = async (userMessage, history = [], userContext = {}) => {
+  const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+  const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-  const qaData = {
-    "hello": "Hello! I am your InsuAI Assistant. I can help you with policy inquiries, recommendations, and general insurance questions. How can I assist you today?",
-    "hi": "Hi there! How can I help you with your insurance needs today?",
-    "hey": "Hey! How can I assist you today?",
-
-    "general policy inquiry": "We offer a wide range of insurance products including Health, Life, Auto, and Corporate plans. You can view all our active offerings in the 'Policy Offerings' section. Is there a specific type you're interested in?",
-
-    "what insurance policies are available?": "Currently, we have Comprehensive Health Insurance, Term Life Protection, Premium Auto Insurance, and specialized Business Coverage available. Each plan is designed to provide maximum security for your specific needs.",
-
-    "show me all health insurance plans": "Our health plans include: 1. Individual Star Health, 2. Family Floater Plus, and 3. Senior Citizen Care. These plans cover hospitalization, pre-existing diseases (after waiting period), and regular health check-ups.",
-
-    "what is the best policy for senior citizens?": "For senior citizens, we highly recommend our 'Senior Citizen Care' policy. It features lower waiting periods for pre-existing diseases, cashless hospitalization across 5000+ hospitals, and dedicated support for elderly claims.",
-
-    "do you offer corporate insurance plans?": "Yes, we offer Group Health and Liability insurance for corporations. Our plans include employee wellness programs and simplified claim processing for HR departments. Would you like to speak to a corporate specialist?",
-
-    "what documents are required to apply for a policy?": "To apply, you typically need: 1. A valid Govt ID (Aadhar/Passport), 2. Address Proof, 3. Income Proof (for Life Insurance), and 4. Recent medical reports (if applicable for health plans over age 45).",
-
-    "suggest a health insurance plan for a 35-year-old": "For a 35-year-old, the 'Individual Star Health' plan is ideal. It offers a high sum insured with low premiums, restoration benefits, and covers modern treatments. It's the perfect balance of cost and coverage.",
-
-    "which policy is best for my family?": "The 'Family Floater Plus' is our top recommendation for families. It covers you, your spouse, and up to 3 children under a single sum insured, making it more cost-effective than individual policies.",
-
-    "i want low premium and high coverage, what do you suggest?": "If you're looking for value, our 'Direct Benefit' plans offer competitive premiums by focusing on core coverages. You can also opt for a higher deductible to significantly lower your annual premium.",
-
-    "recommend a policy for critical illness coverage": "Our 'Critical Illness Rider' can be added to any Health or Life policy. It provides a lump sum payment upon diagnosis of 30+ critical illnesses, including cancer and heart stroke, to help with treatment costs.",
-
-    "what insurance plan is suitable for small businesses?": "The 'SME Protector' plan is designed specifically for small businesses. It covers fire, theft, and public liability, ensuring your business assets and reputation remain secure during unforeseen events."
-  };
-
-  // Simulate a small delay for a natural feel
-  await new Promise(resolve => setTimeout(resolve, 800));
-
-  // Find exact match or keyword match
-  const match = Object.keys(qaData).find(key => lowText.includes(key));
-
-  if (match) {
+  if (!GROQ_API_KEY) {
+    console.error('Groq API Key is missing in .env file');
     return {
-      success: true,
-      text: qaData[match]
+      success: false,
+      message: "Chatbot configuration error. Please contact administrator."
     };
   }
 
-  // Fallback
-  return {
-    success: true,
-    text: "That's a great question! While I don't have a specific answer for that in my current database, I can help you with policy inquiries, health plans, or document requirements. Would you like to see our available policies?"
-  };
+  try {
+    const { name, email, policies = [], appointments = [] } = userContext;
+
+    const messages = [
+      {
+        role: "system",
+        content: `You are the InsuAI Assistant, an intelligent support partner for the InsurAI platform. 
+InsurAI is a modern insurance management platform bridging the gap between users, agents, and administrators.
+
+Current User Context:
+- Name: ${name || 'Valued User'}
+- Email: ${email || 'Not provided'}
+- Active Policies: ${policies.length > 0 ? policies.map(p => `${p.policyTypeName} (${p.status})`).join(', ') : 'No active policies'}
+- Upcoming Appointments: ${appointments.length > 0 ? appointments.map(a => `${a.slot.startTime} with Agent ${a.agent.name}`).join(', ') : 'No upcoming appointments'}
+
+Key Features of InsurAI:
+- Users: Discover policies (Health, Life, Auto, etc.), apply for policies, book appointments with agents, and provide feedback.
+- Agents: Manage availability, track requests, view client feedback, and create new policy offerings.
+- Admins: Monitor system health, manage users/agents, and oversee policy applications globally.
+
+Policy Offerings Knowledge:
+- Health: Individual Star Health, Family Floater Plus, Senior Citizen Care.
+- Life: Term Life Protection.
+- Auto: Premium Auto Insurance.
+- Specialized: Business Coverage (SME Protector).
+
+General System Instructions:
+- To book an appointment, users should go to the "Agents" section and select a time slot.
+- To apply for a policy, users should browse "Policy Offerings" and click "Apply".
+- To see their status, users can check "My Policies" or "Appointments" tabs.
+
+Your Goal:
+- Solve real-time queries regarding InsurAI.
+- Provide personalized recommendations based on the user's current policies and appointments.
+- Be professional, empathetic, and efficient.
+- If a query is outside InsurAI's scope, politely redirect them back to insurance topics.
+- Support email: insurai02@gmail.com
+
+Tone: Professional, supportive, and efficient.`
+      },
+      ...history.slice(-10).map(msg => ({ // Send last 10 messages for context
+        role: msg.type === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      })),
+      { role: "user", content: userMessage }
+    ];
+
+    const response = await axios.post(GROQ_API_URL, {
+      model: "llama-3.3-70b-versatile",
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 1024,
+    }, {
+      headers: {
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    return {
+      success: true,
+      text: response.data.choices[0].message.content
+    };
+  } catch (error) {
+    console.error('Groq API Error:', error);
+    return {
+      success: false,
+      message: "I'm having trouble connecting to my brain right now. Please try again later or contact our support team at insurai02@gmail.com."
+    };
+  }
 };
 
 export default api;

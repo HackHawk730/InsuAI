@@ -35,7 +35,7 @@ const Dashboard = ({ onLogout }) => {
     {
       id: 1,
       type: 'bot',
-      text: "Hello! I'm your InsuAI Assistant. How can I help you with your policies, claims, or appointments today?",
+      text: `Hello ${userName || 'there'}! I'm your InsuAI Assistant. I can see your active policies and appointments, so feel free to ask me anything about your insurance status or our offerings.`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -82,12 +82,15 @@ const Dashboard = ({ onLogout }) => {
     return list;
   }, [agents, userEmail]);
 
+  const [reschedulingAppointment, setReschedulingAppointment] = useState(null);
+
   const handleApplyPolicy = useCallback((newPolicy) => {
     loadPolicies();
     navigate('/dashboard/policies');
   }, [loadPolicies, navigate]);
 
-  const handleReschedule = useCallback(() => {
+  const handleReschedule = useCallback((appointment) => {
+    setReschedulingAppointment(appointment);
     navigate('/dashboard/book');
   }, [navigate]);
 
@@ -95,6 +98,8 @@ const Dashboard = ({ onLogout }) => {
     if (view === 'home') {
       navigate('/dashboard');
     } else {
+      // Clear rescheduling if moving away from book
+      if (view !== 'book') setReschedulingAppointment(null);
       navigate(`/dashboard/${view}`);
     }
   };
@@ -139,7 +144,12 @@ const Dashboard = ({ onLogout }) => {
           element={
             <BookAppointment
               userEmail={userEmail}
-              onBooked={loadAgents}
+              onBooked={() => {
+                loadAgents();
+                setReschedulingAppointment(null);
+              }}
+              reschedulingAppointment={reschedulingAppointment}
+              onCancelReschedule={() => setReschedulingAppointment(null)}
             />
           }
         />
@@ -158,7 +168,18 @@ const Dashboard = ({ onLogout }) => {
         <Route path="policies" element={<MyPolicies policies={myPolicies} />} />
         <Route
           path="support"
-          element={<Support messages={chatMessages} setMessages={setChatMessages} />}
+          element={
+            <Support
+              messages={chatMessages}
+              setMessages={setChatMessages}
+              userContext={{
+                name: userName,
+                email: userEmail,
+                policies: myPolicies,
+                appointments: myAppointments
+              }}
+            />
+          }
         />
         <Route path="settings" element={<Settings userName={userName} userEmail={userEmail} />} />
         <Route path="*" element={<Navigate to="" replace />} />

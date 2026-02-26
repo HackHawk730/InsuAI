@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { HiSupport, HiPaperAirplane, HiUser, HiChatAlt2, HiSparkles } from 'react-icons/hi';
+import { HiSupport, HiPaperAirplane, HiUser, HiChatAlt2, HiSparkles, HiRefresh } from 'react-icons/hi';
 import { generateAIChatResponse } from '../../services/api';
 import './shared.css';
 import './Support.css';
 
-const Support = ({ messages, setMessages }) => {
+const Support = ({ messages, setMessages, userContext }) => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
@@ -31,8 +31,8 @@ const Support = ({ messages, setMessages }) => {
     setInput('');
     setIsTyping(true);
 
-    // Call Real OpenAI API
-    const response = await generateAIChatResponse(userMessageText, messages);
+    // Call Real Groq API with user context
+    const response = await generateAIChatResponse(userMessageText, messages, userContext);
 
     setMessages(prev => [...prev, {
       id: Date.now() + 1,
@@ -48,8 +48,24 @@ const Support = ({ messages, setMessages }) => {
   return (
     <div className="ud-support-container">
       <div className="ud-support-header">
-        <h1 className="ud-page-title">InsuAI Assistant</h1>
-        <p className="ud-page-subtitle">Your real-time insurance support partner.</p>
+        <div className="ud-support-title-row">
+          <div>
+            <h1 className="ud-page-title">InsuAI Assistant</h1>
+            <p className="ud-page-subtitle">Your real-time insurance support partner.</p>
+          </div>
+          <button
+            className="ud-clear-chat-btn"
+            onClick={() => setMessages([{
+              id: Date.now(),
+              type: 'bot',
+              text: `Chat cleared. How else can I assist you, ${userContext.name || 'there'}?`,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }])}
+            title="Clear Conversation"
+          >
+            <HiRefresh />
+          </button>
+        </div>
       </div>
 
       <div className="ud-chat-card">
@@ -89,6 +105,9 @@ const Support = ({ messages, setMessages }) => {
             <HiPaperAirplane />
           </button>
         </form>
+        <div className="ud-chat-footer">
+          <HiSparkles /> Powered by Llama 3.3 Intelligence
+        </div>
       </div>
 
       <div className="ud-support-info-grid">
@@ -103,7 +122,7 @@ const Support = ({ messages, setMessages }) => {
           <p>Average wait: &lt; 2 mins<br />Available 24/7</p>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

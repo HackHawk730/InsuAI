@@ -7,7 +7,8 @@ import {
     HiUser,
     HiBell,
     HiCheckCircle,
-    HiInformationCircle
+    HiInformationCircle,
+    HiDocumentText
 } from 'react-icons/hi';
 import { fetchAgentRequests, fetchAllPolicies } from '../../services/api';
 import { getSession } from '../../services/session';
@@ -37,10 +38,21 @@ const AgentCalendar = () => {
             }
 
             if (polResult.success) {
-                // Filter policies that might have "deadlines" 
-                // Using "Pending" policies as deadlines for review
-                const pendingPolicies = (polResult.policies || []).filter(p => p.status === 'Pending');
-                setPolicyDeadlines(pendingPolicies);
+                // Map policies to calendar-friendly format
+                const mappedPolicies = (polResult.policies || []).map(p => {
+                    let pDate = "";
+                    if (p.appliedAt) {
+                        // Assuming ISO string or format that can be parsed
+                        // If it's an array [2024, 5, 20...], we handle it
+                        if (Array.isArray(p.appliedAt)) {
+                            pDate = `${p.appliedAt[0]}-${String(p.appliedAt[1]).padStart(2, '0')}-${String(p.appliedAt[2]).padStart(2, '0')}`;
+                        } else {
+                            pDate = p.appliedAt.split('T')[0];
+                        }
+                    }
+                    return { ...p, date: pDate, type: 'POLICY' };
+                });
+                setPolicyDeadlines(mappedPolicies);
             }
         } catch (error) {
             console.error("Error loading calendar data", error);
@@ -87,16 +99,19 @@ const AgentCalendar = () => {
 
             // For policy deadlines (simulation using applicationDate if available)
             const dayDeadlines = policyDeadlines.filter(p => {
-                // If there's no specific deadline date, we might not show it on home calendar
-                // or we could use applicationDate + 3 days as "Deadline"
-                return false;
+                return p.date === dateStr;
             });
+
+            const combinedEvents = [
+                ...dayAppointments.map(a => ({ ...a, type: 'APPOINTMENT' })),
+                ...dayDeadlines
+            ];
 
             days.push({
                 type: 'current',
                 day: d,
                 dateStr,
-                appointments: dayAppointments,
+                appointments: combinedEvents,
                 hasDeadline: dayDeadlines.length > 0,
                 isToday: new Date().toDateString() === new Date(year, month, d).toDateString()
             });
@@ -113,8 +128,10 @@ const AgentCalendar = () => {
 
     const activeEvents = useMemo(() => {
         if (!selectedDate) return [];
-        return appointments.filter(app => app.date === selectedDate);
-    }, [selectedDate, appointments]);
+        const apps = appointments.filter(app => app.date === selectedDate).map(a => ({ ...a, type: 'APPOINTMENT' }));
+        const pols = policyDeadlines.filter(p => p.date === selectedDate);
+        return [...apps, ...pols];
+    }, [selectedDate, appointments, policyDeadlines]);
 
     return (
         <div className="agent-subpage">
@@ -169,13 +186,52 @@ const AgentCalendar = () => {
                             <div className="empty-state">Loading your schedule...</div>
                         ) : activeEvents.length > 0 ? (
                             activeEvents.map((ev, i) => (
-                                <div key={i} className={`event-item-card ${ev.status.toLowerCase()}`}>
-                                    <div className="event-time">
-                                        <HiClock /> {ev.startTime} - {ev.endTime}
+                                <div key={i} className={`event-item-card ${ev.status?.toLowerCase() || 'pending'} ${ev.type === 'POLICY' ? 'policy-task' : ''}`}>
+                                    <div className="event-meta-top">
+                                        <div className={`status-pill ${ev.status?.toLowerCase() || 'pending'}`}>
+                                            <span className="dot"></span>
+                                            {ev.status || 'Pending'}
+                                        </div>
+                                        <span className={`type-badge ${ev.type.toLowerCase()}`}>{ev.type}</span>
                                     </div>
-                                    <h4 className="event-user">{ev.bookedByUserEmail}</h4>
-                                    <p className="event-type">{ev.appointmentType}</p>
-                                    <div className="event-status-tag">{ev.status}</div>
+
+                                    {ev.type === 'APPOINTMENT' ? (
+                                        <div className="event-body">
+                                            <div className="event-row">
+                                                <HiClock className="ev-icon" />
+                                                <span className="ev-time-text">{ev.startTime} - {ev.endTime}</span>
+                                            </div>
+                                            <div className="event-row">
+                                                <HiUser className="ev-icon" />
+                                                <span className="ev-user-text">{ev.bookedByUserEmail}</span>
+                                            </div>
+                                            <div className="event-row">
+                                                <HiInformationCircle className="ev-icon" />
+                                                <span className="ev-desc-text">{ev.appointmentType}</span>
+                                            </div>
+                                            {ev.userNote && (
+                                                <div className="event-note-wrapper">
+                                                    <p className="note-text">"{ev.userNote}"</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="event-body">
+                                            <div className="event-row">
+                                                <HiCheckCircle className="ev-icon success" />
+                                                <span className="ev-time-text">Submission Date: {ev.date}</span>
+                                            </div>
+                                            <div className="event-row">
+                                                <HiUser className="ev-icon" />
+                                                <span className="ev-user-text">{ev.userEmail}</span>
+                                            </div>
+                                            <div className="event-row">
+                                                <HiDocumentText className="ev-icon" />
+                                                <span className="ev-desc-text">{ev.policyTypeName}</span>
+                                            </div>
+                                            <div className="policy-id-tag">ID: {ev.id?.substring(0, 8)}...</div>
+                                        </div>
+                                    )}
                                 </div>
                             ))
                         ) : (

@@ -250,6 +250,180 @@
     color: #4ade80;
 }
 
+.event-meta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.event-category-tag {
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(96, 165, 250, 0.2);
+    color: #60a5fa;
+    text-transform: uppercase;
+}
+
+.policy-task .event-category-tag {
+    background: rgba(167, 139, 250, 0.2);
+    color: #a78bfa;
+}
+
+.policy-task {
+    border-left: 4px solid #a78bfa !important;
+}
+
+.event-note-bubble {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.event-details-mini {
+    display: flex;
+    gap: 12px;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.event-meta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.status-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #94a3b8;
+}
+
+.status-pill.confirmed .dot,
+.status-pill.approved .dot {
+    background: #22c55e;
+}
+
+.status-pill.booked .dot,
+.status-pill.pending .dot {
+    background: #f59e0b;
+}
+
+.status-pill.completed .dot {
+    background: #3b82f6;
+}
+
+.status-pill.rejected .dot {
+    background: #ef4444;
+}
+
+.type-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+}
+
+.type-badge.appointment {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.type-badge.policy {
+    background: rgba(167, 139, 250, 0.1);
+    color: #a78bfa;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.event-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.event-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ev-icon {
+    font-size: 1.1rem;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.ev-icon.success {
+    color: #22c55e;
+}
+
+.ev-time-text {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #60a5fa;
+}
+
+.ev-user-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f1f5f9;
+}
+
+.ev-desc-text {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.event-note-wrapper {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 4px;
+}
+
+.note-text {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+.policy-id-tag {
+    font-size: 0.7rem;
+    color: rgba(148, 163, 184, 0.4);
+    font-family: monospace;
+    margin-top: 4px;
+}
+
+.policy-task {
+    border-left: 4px solid #a78bfa !important;
+}
+
 .upcoming-summary {
     margin-top: 12px;
 }

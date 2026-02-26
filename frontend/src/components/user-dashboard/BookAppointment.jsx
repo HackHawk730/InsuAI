@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { HiBadgeCheck, HiStar } from 'react-icons/hi';
-import { fetchAgentsWithAvailability, bookSchedule } from '../../services/api';
+import { HiBadgeCheck, HiStar, HiRefresh } from 'react-icons/hi';
+import { fetchAgentsWithAvailability, bookSchedule, updateScheduleStatus } from '../../services/api';
 import './shared.css';
 import './BookAppointment.css';
 
@@ -10,7 +10,7 @@ const getSpecialization = (agent) => {
   return agent?.specialization || SPECIALIZATIONS[idx];
 };
 
-const BookAppointment = ({ userEmail, onBooked }) => {
+const BookAppointment = ({ userEmail, onBooked, reschedulingAppointment, onCancelReschedule }) => {
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -83,6 +83,25 @@ const BookAppointment = ({ userEmail, onBooked }) => {
     setBookingLoading(true);
     setMessage('');
 
+    // Check for conflicts: Does this user already have an appointment at this exact time?
+    // We check all agents' schedules for this user's email at the same day/time (excluding the one we might be rescheduling)
+    const conflict = agents.some(a =>
+      a.agentSchedule?.some(s => {
+        const isSelf = reschedulingAppointment && reschedulingAppointment.slot.id === s.id;
+        return !isSelf &&
+          (s.bookedByUserEmail || '').toLowerCase() === userEmail.toLowerCase() &&
+          s.date === selected.slot.date &&
+          s.startTime === selected.slot.startTime &&
+          ['booked', 'confirmed', 'approved'].includes((s.status || '').toLowerCase());
+      })
+    );
+
+    if (conflict) {
+      setMessage('Booking Failed: You already have another appointment at this exact time. Please choose a different slot.');
+      setBookingLoading(false);
+      return;
+    }
+
     const res = await bookSchedule({
       agentEmail: selected.agent.email,
       scheduleId: selected.slot.id,
@@ -94,13 +113,27 @@ const BookAppointment = ({ userEmail, onBooked }) => {
       appointmentType: selected.slot.appointmentType,
     });
 
-    setBookingLoading(false);
-    setMessage(res.message);
-
     if (res.success) {
+      // If we are rescheduling, we must cancel the old appointment
+      if (reschedulingAppointment) {
+        try {
+          await updateScheduleStatus(
+            reschedulingAppointment.agent.email,
+            reschedulingAppointment.slot.id,
+            'Available' // Or 'Cancelled'. Making it 'Available' frees it up for others. 
+          );
+        } catch (err) {
+          console.error("Failed to cancel old appointment", err);
+        }
+      }
+
+      setMessage(reschedulingAppointment ? 'Appointment Rescheduled Successfully!' : 'Slot booked successfully!');
       closeBooking();
       loadAgents();
       onBooked?.();
+    } else {
+      setMessage(res.message || 'Booking failed. Please try again.');
+      setBookingLoading(false);
     }
   };
 
@@ -110,6 +143,20 @@ const BookAppointment = ({ userEmail, onBooked }) => {
       <p className="ud-page-subtitle">
         Choose an agent by specialization and rating, then pick an available slot.
       </p>
+
+      {reschedulingAppointment && (
+        <div className="ud-reschedule-notice">
+          <div className="notice-inner">
+            <HiRefresh className="spin" />
+            <div className="notice-content">
+              <strong>Rescheduling Mode</strong>
+              <p>You are moving your appointment with <b>{reschedulingAppointment.agent.name || reschedulingAppointment.agent.email}</b>
+                ({reschedulingAppointment.slot.date} at {reschedulingAppointment.slot.startTime}).</p>
+            </div>
+            <button className="ud-btn-sm ud-btn-secondary" onClick={onCancelReschedule}>Cancel Reschedule</button>
+          </div>
+        </div>
+      )}
 
       {message && (
         <div
