@@ -8,7 +8,7 @@ WORKDIR /app
 # Using 'npm ci' is often better for Docker to ensure exact versions
 COPY package*.json ./
 RUN npm install
-
+a
 # 4. Copy rest of Code and Build
 COPY . .
 RUN npm run build

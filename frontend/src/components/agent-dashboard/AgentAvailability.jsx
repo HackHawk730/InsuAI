@@ -120,9 +120,17 @@ const AgentAvailability = () => {
                         </select>
                     </div>
 
-                    <button type="submit" className="submit-btn" disabled={loading}>
-                        {loading ? 'Updating...' : 'Update Availability'}
+                    <button
+                        type="submit"
+                        className="submit-btn"
+                        disabled={loading}
+                        style={{
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}>
+                        {loading ? "Updating..." : "Update Availability"}
                     </button>
+
 
                     {message.text && (
                         <p className={message.type === 'success' ? 'success-msg' : 'error-msg'}>
