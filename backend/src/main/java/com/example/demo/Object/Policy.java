@@ -3,7 +3,7 @@ package com.example.demo.Object;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Document(collection = "policies")
 @Data
@@ -17,8 +17,8 @@ public class Policy {
     private String policyTypeName;
     private String status; // PENDING, APPROVED, REJECTED, CHANGES_REQUESTED
     private String agentComments;
-    private LocalDateTime appliedAt;
-    private LocalDateTime updatedAt;
+    private Instant appliedAt;
+    private Instant updatedAt;
     private java.util.Map<String, Object> formData;
 
     public String getId() {
@@ -61,11 +61,11 @@ public class Policy {
         this.agentComments = comments;
     }
 
-    public void setAppliedAt(java.time.LocalDateTime date) {
+    public void setAppliedAt(Instant date) {
         this.appliedAt = date;
     }
 
-    public void setUpdatedAt(java.time.LocalDateTime date) {
+    public void setUpdatedAt(Instant date) {
         this.updatedAt = date;
     }
 

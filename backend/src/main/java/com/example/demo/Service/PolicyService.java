@@ -10,7 +10,7 @@ import com.example.demo.Object.Notification;
 import com.example.demo.Repo.NotificationRepo;
 import com.example.demo.Service.EmailService;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -42,8 +42,8 @@ public class PolicyService {
         policy.setPolicyTypeName(policyTypeName);
         policy.setFormData(formData);
         policy.setStatus("PENDING");
-        policy.setAppliedAt(LocalDateTime.now());
-        policy.setUpdatedAt(LocalDateTime.now());
+        policy.setAppliedAt(Instant.now());
+        policy.setUpdatedAt(Instant.now());
         Policy savedPolicy = policyRepo.save(policy);
 
         // Notify User
@@ -73,7 +73,7 @@ public class PolicyService {
         form.setTypeId(typeId);
         form.setPolicyTypeName(policyTypeName);
         form.setFormData(formData);
-        form.setSubmittedAt(LocalDateTime.now());
+        form.setSubmittedAt(Instant.now());
         policyApplyFormRepo.save(form);
 
         return savedPolicy;
@@ -105,7 +105,7 @@ public class PolicyService {
         if (policy != null) {
             policy.setStatus(status);
             policy.setAgentComments(comments);
-            policy.setUpdatedAt(LocalDateTime.now());
+            policy.setUpdatedAt(Instant.now());
 
             Policy updatedPolicy = policyRepo.save(policy);
 

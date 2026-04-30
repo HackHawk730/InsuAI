@@ -3,6 +3,7 @@ package com.example.demo.Object;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.time.Instant;
 import java.util.List;
 
 @Document(collection = "policy_offerings")
@@ -23,5 +24,5 @@ public class PolicyOffering {
     private String agentEmail;
     private String companyName;
 
-    private java.time.LocalDateTime createdAt;
+    private Instant createdAt;
 }

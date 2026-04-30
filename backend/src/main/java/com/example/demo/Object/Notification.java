@@ -3,7 +3,7 @@ package com.example.demo.Object;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(collection = "notifications")
@@ -17,14 +17,14 @@ public class Notification {
     private String message;
     private String type; // "INFO", "SUCCESS", "WARNING", "ERROR"
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @JsonProperty("isRead")
     private boolean isRead;
 
     // Default Constructor
     public Notification() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = Instant.now();
         this.isRead = false;
     }
 
@@ -34,7 +34,7 @@ public class Notification {
         this.title = title;
         this.message = message;
         this.type = type;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = Instant.now();
         this.isRead = false;
     }
 }

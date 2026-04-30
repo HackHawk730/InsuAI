@@ -7,7 +7,7 @@ import com.example.demo.Repo.UserDTOREPO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +46,7 @@ public class PolicyOfferingService {
         offering.setAgentEmail(agentEmail);
         offering.setAgentName(agent.getName());
         offering.setCompanyName(agent.getCompany());
-        offering.setCreatedAt(LocalDateTime.now());
+        offering.setCreatedAt(Instant.now());
 
         policyOfferingRepo.save(offering);
         return "Policy published successfully";
